@@ -165,20 +165,27 @@
                     <span class="font-display tracking-wide text-3xl text-gray-800">Mundo<span class="text-melon-dark">Melón</span></span>
                 </div>
                 
-                <!-- Menú de Enlaces a Otros Archivos HTML -->
-                <div class="hidden lg:flex space-x-6 items-center bg-white/50 px-8 py-3 rounded-full border border-gray-100 shadow-sm text-sm font-bold">
-                    <a href="Inicio.html" class="text-gray-700 hover:text-melon-dark transition-all hover:scale-105">Inicio</a>
-                    <a href="Mango.html" class="text-gray-700 hover:text-melon-dark transition-all hover:scale-105">Mango</a>
-                    <a href="Limon.html" class="text-gray-700 hover:text-melon-dark transition-all hover:scale-105">Limón</a>
-                    <a href="Papaya.html" class="text-gray-700 hover:text-melon-dark transition-all hover:scale-105">Papaya</a>
-                    <a href="Coco.html" class="text-gray-700 hover:text-melon-dark transition-all hover:scale-105">Coco</a>
-                    <!-- Fruta Actual Highlighted -->
-                    <a href="Melon.html" class="text-melon-dark border-b-2 border-melon-dark pb-1 scale-105">Melón</a>
+    <nav class="fixed w-full z-50 bg-white/90 backdrop-blur-xl shadow-sm transition-all duration-300 border-b border-gray-100" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-24">
+                <div class="flex-shrink-0 flex items-center gap-3 cursor-pointer group" onclick="window.scrollTo(0,0)">
+                    <div class="w-12 h-12 bg-main text-white rounded-full flex items-center justify-center animate-wiggle shadow-md">
+                        <i class="fa-solid fa-basket-shopping text-2xl"></i>
+                    </div>
+                    <span class="font-display tracking-wide text-3xl text-gray-800">Mundo<span class="text-main">Frutal</span></span>
+                </div>
+                
+                <div class="hidden lg:flex space-x-6 items-center bg-white/80 px-8 py-3 rounded-full border border-gray-100 shadow-sm text-sm font-bold">
+                    <a href="index.html" class="text-main border-b-2 border-main pb-1 scale-105">Inicio</a>
+                    <a href="mango.html" class="text-gray-600 hover:text-[#FF9F1C] transition-all hover:scale-105">Mango</a>
+                    <a href="limon.html" class="text-gray-600 hover:text-[#8AC926] transition-all hover:scale-105">Limón</a>
+                    <a href="papaya.html" class="text-gray-600 hover:text-[#E85D04] transition-all hover:scale-105">Papaya</a>
+                    <a href="coco.html" class="text-gray-600 hover:text-[#8B5A2B] transition-all hover:scale-105">Coco</a>
+                    <a href="melon.html" class="text-gray-600 hover:text-[#FFCA3A] transition-all hover:scale-105">Melón</a>
                 </div>
             </div>
         </div>
     </nav>
-
     <!-- Hero Section -->
     <header class="relative min-h-screen flex items-center justify-center pt-24 overflow-hidden z-10">
         <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/food.png')] opacity-5 z-0 pointer-events-none"></div>
@@ -216,7 +223,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-10">
                 
                 <!-- 1. MANGO -->
-                <a href="Mango.html" class="block group reveal sm:col-span-1 lg:col-span-2">
+                <a href="mango.html" class="block group reveal sm:col-span-1 lg:col-span-2">
                     <div class="bg-white rounded-[2rem] p-8 shadow-lg border-2 border-orange-100 hover:shadow-2xl hover:border-orange-400 transition-all transform hover:-translate-y-3 relative overflow-hidden h-full flex flex-col items-center text-center">
                         <div class="absolute inset-0 bg-gradient-to-br from-orange-50 to-white opacity-50 z-0"></div>
                         <div class="w-32 h-32 mb-6 relative z-10 group-hover:scale-110 transition-transform duration-500 animate-float">
@@ -232,7 +239,7 @@
                 </a>
 
                 <!-- 2. LIMÓN -->
-                <a href="Limon.html" class="block group reveal delay-100 sm:col-span-1 lg:col-span-2">
+                <a href="limon.html" class="block group reveal delay-100 sm:col-span-1 lg:col-span-2">
                     <div class="bg-white rounded-[2rem] p-8 shadow-lg border-2 border-lime-100 hover:shadow-2xl hover:border-lime-500 transition-all transform hover:-translate-y-3 relative overflow-hidden h-full flex flex-col items-center text-center">
                         <div class="absolute inset-0 bg-gradient-to-br from-lime-50 to-white opacity-50 z-0"></div>
                         <div class="w-32 h-32 mb-6 relative z-10 group-hover:scale-110 transition-transform duration-500 animate-float" style="animation-delay: 1s;">
@@ -248,7 +255,7 @@
                 </a>
 
                 <!-- 3. PAPAYA -->
-                <a href="Papaya.html" class="block group reveal delay-200 sm:col-span-1 lg:col-span-2">
+                <a href="papaya.html" class="block group reveal delay-200 sm:col-span-1 lg:col-span-2">
                     <div class="bg-white rounded-[2rem] p-8 shadow-lg border-2 border-red-100 hover:shadow-2xl hover:border-red-400 transition-all transform hover:-translate-y-3 relative overflow-hidden h-full flex flex-col items-center text-center">
                         <div class="absolute inset-0 bg-gradient-to-br from-red-50 to-white opacity-50 z-0"></div>
                         <div class="w-32 h-32 mb-6 relative z-10 group-hover:scale-110 transition-transform duration-500 animate-float" style="animation-delay: 2s;">
@@ -264,7 +271,7 @@
                 </a>
 
                 <!-- 4. COCO -->
-                <a href="Coco.html" class="block group reveal delay-100 sm:col-span-1 lg:col-start-2 lg:col-span-2">
+                <a href="coco.html" class="block group reveal delay-100 sm:col-span-1 lg:col-start-2 lg:col-span-2">
                     <div class="bg-white rounded-[2rem] p-8 shadow-lg border-2 border-amber-100 hover:shadow-2xl hover:border-amber-700 transition-all transform hover:-translate-y-3 relative overflow-hidden h-full flex flex-col items-center text-center">
                         <div class="absolute inset-0 bg-gradient-to-br from-amber-50 to-white opacity-50 z-0"></div>
                         <div class="w-32 h-32 mb-6 relative z-10 group-hover:scale-110 transition-transform duration-500 animate-float" style="animation-delay: 3s;">
@@ -280,7 +287,7 @@
                 </a>
 
                 <!-- 5. MELÓN -->
-                <a href="Melon.html" class="block group reveal delay-200 sm:col-span-1 lg:col-span-2">
+                <a href="melon.html" class="block group reveal delay-200 sm:col-span-1 lg:col-span-2">
                     <div class="bg-white rounded-[2rem] p-8 shadow-lg border-2 border-yellow-200 hover:shadow-2xl hover:border-yellow-500 transition-all transform hover:-translate-y-3 relative overflow-hidden h-full flex flex-col items-center text-center">
                         <div class="absolute inset-0 bg-gradient-to-br from-yellow-50 to-white opacity-50 z-0"></div>
                         <div class="w-32 h-32 mb-6 relative z-10 group-hover:scale-110 transition-transform duration-500 animate-float" style="animation-delay: 4s;">
