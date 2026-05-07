@@ -329,6 +329,7 @@
                     </div>
                 </div>
             </div>
+
             
             <div class="border-t border-white/20 w-full pt-8 text-white/50 text-sm font-bold flex flex-col md:flex-row justify-between items-center gap-4 px-6">
                 <span>&copy; 2026 Mundo Frutal. Proyecto Escolar.</span>
@@ -337,9 +338,8 @@
         </div>
     </footer>
 
+    <script>
 
-
-        // Efecto Navbar al hacer Scroll
         window.addEventListener('scroll', () => {
             const navbar = document.getElementById('navbar');
             if (window.scrollY > 50) {
@@ -352,7 +352,6 @@
             }
         });
 
-        // Efecto Reveal de Tarjetas
         function reveal() {
             var reveals = document.querySelectorAll(".reveal");
             for (var i = 0; i < reveals.length; i++) {
@@ -364,7 +363,7 @@
             }
         }
         window.addEventListener("scroll", reveal);
-        reveal(); // Inicializar
+        reveal(); 
     </script>
 </body>
 </html>
