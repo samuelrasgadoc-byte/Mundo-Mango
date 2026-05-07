@@ -337,20 +337,7 @@
         </div>
     </footer>
 
-    <script>
-        // Función para descargar el archivo HTML
-        function downloadHTML() {
-            const htmlContent = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'index.html'; // Nombre del archivo principal
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-        }
+
 
         // Efecto Navbar al hacer Scroll
         window.addEventListener('scroll', () => {
