@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>El Mundo del Melón | Historia, Cultivo y Cosecha</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Chewy&family=Nunito:wght@400;600;800;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        melon: {
+                            light: '#FEE0B2',    /* Beige/Crema exterior */
+                            DEFAULT: '#FF9F1C',  /* Naranja pulpa cantalupo */
+                            dark: '#E85D04',     /* Naranja oscuro */
+                            leaf: '#2D6A4F',     /* Verde de la enredadera */
+                            leafLight: '#52B788',/* Verde claro (Honeydew) */
+                            bg: '#FFFDF7',       /* Blanco sutil de fondo */
+                            seeds: '#F3C68B'     /* Color de las semillas */
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Nunito', 'sans-serif'],
+                        display: ['Chewy', 'cursive'],
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'spin-slow': 'spin 12s linear infinite',
+                        'wiggle': 'wiggle 1.5s ease-in-out infinite',
+                        'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0) rotate(0deg)' },
+                            '50%': { transform: 'translateY(-20px) rotate(5deg)' },
+                        },
+                        wiggle: {
+                            '0%, 100%': { transform: 'rotate(-5deg)' },
+                            '50%': { transform: 'rotate(5deg)' },
+                        },
+                        fall: {
+                            '0%': { transform: 'translateY(-10vh) rotate(0deg) scale(0.8)', opacity: '0' },
+                            '10%': { opacity: '0.6' },
+                            '90%': { opacity: '0.6' },
+                            '100%': { transform: 'translateY(110vh) rotate(360deg) scale(1.2)', opacity: '0' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Cursor Personalizado (Tono Melon) */
+        body {
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="%23FF9F1C"><path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4Z"/></svg>') 12 12, auto;
+        }
+        
+        a, button, .cursor-pointer {
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="%232D6A4F"><path d="M12,2L15,9L22,12L15,15L12,22L9,15L2,12L9,9L12,2Z"/></svg>') 12 12, pointer !important;
+        }
+
+        /* Animaciones Reveal */
+        .reveal {
+            opacity: 0;
+            transform: translateY(50px) scale(0.9);
+            transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+        .delay-100 { transition-delay: 100ms; }
+        .delay-200 { transition-delay: 200ms; }
+        .delay-300 { transition-delay: 300ms; }
+
+        /* Contenedor de Lluvia de Melones */
+        #falling-items-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .falling-item {
+            position: absolute;
+            animation: fall linear infinite;
+        }
+
+        /* Degradados */
+        .text-gradient {
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-image: linear-gradient(to right, #E85D04, #FF9F1C, #52B788);
+        }
+
+        /* Estilos del Minijuego */
+        #game-area {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(180deg, #87CEEB 0%, #E0F6FF 100%);
+            border-radius: 2rem;
+            box-shadow: inset 0 10px 30px rgba(0,0,0,0.15);
+            cursor: crosshair;
+        }
+        .tree-canopy {
+            position: absolute;
+            top: -100px;
+            left: -50px;
+            right: -50px;
+            height: 250px;
+            background: #2D6A4F;
+            border-radius: 50%;
+            box-shadow: 
+                inset -20px -20px 60px rgba(0,0,0,0.3),
+                0 20px 40px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+        .tree-canopy::after {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            left: 20%;
+            width: 60%;
+            height: 100px;
+            background: #52B788;
+            border-radius: 50%;
+            z-index: -1;
+        }
+        .game-item {
+            position: absolute;
+            width: 65px;
+            height: 65px; 
+            cursor: pointer;
+            z-index: 10;
+            user-select: none;
+            transition: transform 0.1s;
+            filter: drop-shadow(0 5px 5px rgba(0,0,0,0.3));
+        }
+        .game-item:active {
+            transform: scale(0.7) rotate(15deg);
+        }
+        .floating-score {
+            position: absolute;
+            font-family: 'Chewy', cursive;
+            font-size: 2.5rem;
+            pointer-events: none;
+            animation: floatUp 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            z-index: 20;
+            text-shadow: 2px 2px 0 #fff, -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(0.5); opacity: 0; }
+            50% { opacity: 1; transform: translateY(-30px) scale(1.2); }
+            100% { transform: translateY(-60px) scale(1); opacity: 0; }
+        }
+        .splat-effect {
+            animation: splat 0.4s ease-out forwards;
+        }
+        @keyframes splat {
+            0% { transform: scale(1); opacity: 1; filter: brightness(1); }
+            50% { transform: scale(1.5); opacity: 0.8; filter: brightness(1.5); }
+            100% { transform: scale(2); opacity: 0; filter: brightness(2); }
+        }
+
+        /* Blob Background */
+        .blob-shape {
+            border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+            animation: blob-morph 8s ease-in-out infinite;
+        }
+        @keyframes blob-morph {
+            0%, 100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+            34% { border-radius: 70% 30% 50% 50% / 30% 30% 70% 70%; }
+            67% { border-radius: 100% 60% 60% 100% / 100% 100% 60% 60%; }
+        }
+    </style>
+</head>
+<body class="bg-melon-bg text-gray-800 antialiased overflow-x-hidden selection:bg-melon selection:text-white">
+
+    <!-- DEFS para Ilustraciones SVG Reutilizables (Temática Melón) -->
+    <svg style="display: none;">
+        <defs>
+            <!-- Melón Entero (Cantalupo con red/textura) -->
+            <g id="svg-melon-entero">
+                <circle cx="50" cy="50" r="45" fill="#FEE0B2"/>
+                <!-- Líneas de textura reticulada -->
+                <path d="M 15 35 Q 50 10 85 35 M 10 50 Q 50 20 90 50 M 15 65 Q 50 90 85 65" stroke="#E2C792" stroke-width="2" fill="none"/>
+                <path d="M 35 15 Q 10 50 35 85 M 50 10 Q 20 50 50 90 M 65 15 Q 90 50 65 85" stroke="#E2C792" stroke-width="2" fill="none"/>
+                <!-- Brillo -->
+                <path d="M 20 50 A 30 30 0 0 1 50 20 A 30 30 0 0 0 20 50 Z" fill="#FFFFFF" opacity="0.4"/>
+            </g>
+            
+            <!-- Melón Cortado (Mostrando pulpa naranja y semillas) -->
+            <g id="svg-melon-cortado">
+                <!-- Cáscara exterior (Beige/Verde claro) -->
+                <path d="M 5 50 A 45 45 0 0 0 95 50 Z" fill="#E2C792"/>
+                <!-- Borde verde (interior de cáscara) -->
+                <path d="M 9 50 A 41 41 0 0 0 91 50 Z" fill="#A9DFBF"/>
+                <!-- Pulpa naranja (Cantalupo) -->
+                <path d="M 14 50 A 36 36 0 0 0 86 50 Z" fill="#FF9F1C"/>
+                <path d="M 20 50 A 30 30 0 0 0 80 50 Z" fill="#FF8C00"/>
+                <!-- Hueco de semillas -->
+                <path d="M 35 50 A 15 10 0 0 0 65 50 Z" fill="#FFD166"/>
+                <!-- Semillas esparcidas en el centro -->
+                <circle cx="45" cy="53" r="2" fill="#E85D04"/>
+                <circle cx="50" cy="55" r="2" fill="#E85D04"/>
+                <circle cx="55" cy="52" r="2" fill="#E85D04"/>
+                <circle cx="48" cy="57" r="2" fill="#E85D04"/>
+                <circle cx="53" cy="56" r="2" fill="#E85D04"/>
+                <circle cx="42" cy="51" r="2" fill="#E85D04"/>
+                <circle cx="58" cy="51" r="2" fill="#E85D04"/>
+                <!-- Corte superior -->
+                <path d="M 5 50 L 95 50" stroke="#E2C792" stroke-width="2"/>
+            </g>
+
+            <!-- Melón Malo/Podrido (Para el Minijuego) -->
+            <g id="svg-melon-malo">
+                <circle cx="50" cy="50" r="45" fill="#A08C63"/>
+                <!-- Manchas de podrido -->
+                <circle cx="35" cy="35" r="10" fill="#5C4D35"/>
+                <circle cx="70" cy="50" r="15" fill="#5C4D35" opacity="0.8"/>
+                <circle cx="40" cy="70" r="8" fill="#5C4D35"/>
+                <!-- Grieta -->
+                <path d="M 40 20 L 45 40 L 30 55 L 50 85" stroke="#3A2C18" stroke-width="3" fill="none"/>
+            </g>
+        </defs>
+    </svg>
+
+    <!-- Contenedor Lluvia Animada -->
+    <div id="falling-items-container"></div>
+
+    <!-- Navegación: ACTUALIZADA PARA CONECTAR HTMLs -->
+    <nav class="fixed w-full z-50 bg-white/80 backdrop-blur-xl shadow-sm transition-all duration-300 border-b border-melon/20" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-24">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center gap-3 cursor-pointer group" onclick="window.scrollTo(0,0)">
+                    <div class="w-12 h-12 relative animate-wiggle">
+                        <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md"><use href="#svg-melon-cortado"></use></svg>
+                    </div>
+                    <span class="font-display tracking-wide text-3xl text-gray-800">Mundo<span class="text-melon-dark">Melón</span></span>
+                </div>
+                
+                <!-- Menú de Enlaces a Otros Archivos HTML -->
+                <div class="hidden lg:flex space-x-6 items-center bg-white/50 px-8 py-3 rounded-full border border-gray-100 shadow-sm text-sm font-bold">
+                    <a href="Inicio.html" class="text-gray-700 hover:text-melon-dark transition-all hover:scale-105">Inicio</a>
+                    <a href="Mango.html" class="text-gray-700 hover:text-melon-dark transition-all hover:scale-105">Mango</a>
+                    <a href="Limon.html" class="text-gray-700 hover:text-melon-dark transition-all hover:scale-105">Limón</a>
+                    <a href="Papaya.html" class="text-gray-700 hover:text-melon-dark transition-all hover:scale-105">Papaya</a>
+                    <a href="Coco.html" class="text-gray-700 hover:text-melon-dark transition-all hover:scale-105">Coco</a>
+                    <!-- Fruta Actual Highlighted -->
+                    <a href="Melon.html" class="text-melon-dark border-b-2 border-melon-dark pb-1 scale-105">Melón</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="relative min-h-screen flex items-center justify-center pt-24 overflow-hidden z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full grid md:grid-cols-2 gap-12 items-center">
+            
+            <div class="text-center md:text-left reveal relative z-20">
+                <div class="inline-flex items-center gap-2 py-2 px-4 rounded-full bg-melon-light/60 text-melon-dark font-bold text-sm tracking-widest uppercase mb-6 border border-melon/30 shadow-sm">
+                    <i class="fa-solid fa-sun text-melon-dark"></i> La Joya del Verano
+                </div>
+                <h1 class="text-6xl lg:text-8xl font-display text-gray-900 mb-4 leading-none drop-shadow-sm">
+                    El Dulce y Vital <br> <span class="text-gradient drop-shadow-md">Rey Melón</span>
+                </h1>
+                <p class="text-xl text-gray-600 mb-10 font-semibold max-w-lg mx-auto md:mx-0 leading-relaxed">
+                    Descubre el arte de cultivar, cosechar y disfrutar de la fruta más jugosa y refrescante. Una inmersión total en la historia y poder hidratante del melón.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-5 justify-center md:justify-start">
+                    <a href="#juego" class="bg-melon-dark text-white px-8 py-4 rounded-full font-bold text-xl hover:bg-melon transform hover:-translate-y-2 transition-all shadow-xl hover:shadow-2xl text-center flex items-center justify-center gap-3">
+                        <svg viewBox="0 0 100 100" class="w-6 h-6"><use href="#svg-melon-entero"></use></svg> ¡A Cosechar!
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Composición Ilustrada Hero -->
+            <div class="relative reveal delay-200 h-[500px] flex items-center justify-center hidden md:flex">
+                <div class="absolute inset-0 bg-melon-light/80 blob-shape -z-10 transform rotate-12 scale-110"></div>
+                <div class="absolute inset-0 bg-melon-leafLight/20 blob-shape -z-10 transform -rotate-12 scale-100 delay-150"></div>
+                
+                <div class="relative w-80 h-80 z-20 animate-float">
+                    <!-- Ilustración Principal Gigante -->
+                    <div class="w-full h-full relative z-10 flex items-center justify-center transform rotate-6 hover:rotate-0 transition-transform duration-500">
+                        <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-2xl"><use href="#svg-melon-cortado"></use></svg>
+                    </div>
+                    
+                    <!-- Ilustraciones Flotantes -->
+                    <div class="absolute -top-12 -right-12 w-32 h-32 animate-wiggle" style="animation-duration: 3s;">
+                        <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-xl"><use href="#svg-melon-entero"></use></svg>
+                    </div>
+                    <div class="absolute -bottom-10 -left-10 w-24 h-24 animate-wiggle" style="animation-duration: 2.5s; animation-direction: reverse;">
+                        <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-xl transform -scale-x-100"><use href="#svg-melon-entero"></use></svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Perfil Botánico -->
+    <section class="py-10 bg-melon-leaf text-white relative z-20 border-y-4 border-melon shadow-[0_0_30px_rgba(0,0,0,0.15)]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-around items-center gap-8 text-center">
+            <div class="reveal">
+                <span class="block text-melon-light font-bold uppercase tracking-widest text-xs mb-2"><i class="fa-solid fa-tag mr-1"></i> Nombre Común</span>
+                <h3 class="text-4xl font-display tracking-wide drop-shadow-sm">Melón</h3>
+            </div>
+            <div class="hidden md:block w-px h-16 bg-white/20 reveal delay-100"></div>
+            <div class="reveal delay-100">
+                <span class="block text-melon-light font-bold uppercase tracking-widest text-xs mb-2"><i class="fa-solid fa-microscope mr-1"></i> Nombre Científico</span>
+                <h3 class="text-4xl font-display tracking-wide italic drop-shadow-sm">Cucumis melo</h3>
+            </div>
+            <div class="hidden md:block w-px h-16 bg-white/20 reveal delay-200"></div>
+            <div class="reveal delay-200">
+                <span class="block text-melon-light font-bold uppercase tracking-widest text-xs mb-2"><i class="fa-solid fa-leaf mr-1"></i> Familia Botánica</span>
+                <h3 class="text-4xl font-display tracking-wide drop-shadow-sm">Cucurbitaceae</h3>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección de Historia Ilustrada -->
+    <section id="historia" class="py-24 px-4 sm:px-6 lg:px-8 bg-white relative z-10">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-20 reveal">
+                <h2 class="text-5xl font-display text-gray-800 tracking-wide">Historia <span class="text-melon-dark">Milenaria</span></h2>
+                <div class="w-24 h-1 bg-melon mx-auto mt-4 rounded-full"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                <div class="bg-melon-bg rounded-3xl p-8 border-2 border-melon-light/80 shadow-xl hover:-translate-y-4 transition-transform duration-300 reveal group">
+                    <div class="h-32 flex items-center justify-center mb-6">
+                        <i class="fa-solid fa-pyramid-sun text-6xl text-melon-leaf group-hover:scale-125 transition-transform duration-500"></i>
+                    </div>
+                    <h3 class="font-display text-3xl text-gray-800 mb-3 text-center">Raíces Africanas y Asiáticas</h3>
+                    <p class="text-gray-600 text-center font-semibold">Su origen exacto se debate, pero la mayoría de los botánicos lo sitúan en África o los valles cálidos del suroeste de Asia (Irán y la India). ¡Incluso los antiguos egipcios lo cultivaban!</p>
+                </div>
+
+                <div class="bg-melon-bg rounded-3xl p-8 border-2 border-melon-light/80 shadow-xl hover:-translate-y-4 transition-transform duration-300 reveal delay-100 group">
+                    <div class="h-32 flex items-center justify-center mb-6">
+                        <i class="fa-solid fa-chess-rook text-6xl text-melon-dark group-hover:scale-125 transition-transform duration-500"></i>
+                    </div>
+                    <h3 class="font-display text-3xl text-gray-800 mb-3 text-center">Viaje por Europa</h3>
+                    <p class="text-gray-600 text-center font-semibold">Griegos y romanos lo consideraban un lujo. Más tarde, los árabes introdujeron variedades mucho más dulces en la Península Ibérica, expandiendo su fama por toda Europa.</p>
+                </div>
+
+                <div class="bg-melon-bg rounded-3xl p-8 border-2 border-melon-light/80 shadow-xl hover:-translate-y-4 transition-transform duration-300 reveal delay-200 group">
+                    <div class="h-32 flex items-center justify-center mb-6 relative">
+                        <svg viewBox="0 0 100 100" class="w-24 h-24 absolute group-hover:scale-125 transition-transform duration-500 drop-shadow-md"><use href="#svg-melon-entero"></use></svg>
+                    </div>
+                    <h3 class="font-display text-3xl text-gray-800 mb-3 text-center">Llegada a América</h3>
+                    <p class="text-gray-600 text-center font-semibold">Cristóbal Colón llevó las primeras semillas de melón a la isla de La Española (Haití/República Dominicana) en 1494. Hoy en día, América es un gigante productor.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECCIÓN: Variedades de Melón -->
+    <section id="variedades" class="py-24 px-4 sm:px-6 lg:px-8 bg-melon-bg relative z-10 border-y-4 border-dashed border-melon-light">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16 reveal">
+                <span class="text-melon-leaf font-bold tracking-widest uppercase text-sm">Diversidad Refrescante</span>
+                <h2 class="text-5xl font-display text-gray-800 mt-2">Variedades <span class="text-melon-dark">Populares</span></h2>
+                <p class="text-gray-600 font-semibold mt-4 max-w-2xl mx-auto">Aunque todos pertenecen a la misma especie, existen variedades con apariencias y sabores radicalmente distintos.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Variedad 1: Cantalupo -->
+                <div class="bg-white rounded-[2rem] overflow-hidden shadow-lg border-2 border-melon/20 reveal hover:shadow-2xl transition-shadow group">
+                    <div class="h-48 bg-melon-light flex items-center justify-center p-6 relative overflow-hidden">
+                        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+                        <svg viewBox="0 0 100 100" class="w-32 h-32 drop-shadow-2xl z-10 transform group-hover:scale-110 transition-transform duration-500"><use href="#svg-melon-cortado"></use></svg>
+                    </div>
+                    <div class="p-8 text-center">
+                        <h3 class="font-display text-3xl text-gray-800 mb-2">Cantalupo</h3>
+                        <p class="text-sm font-bold text-melon-dark uppercase mb-4 tracking-wider">El Clásico Reticulado</p>
+                        <p class="text-gray-600 text-sm leading-relaxed mb-4">Es el melón más popular en Norteamérica. Su piel es beige con una textura similar a una "red". Por dentro, su pulpa es de color naranja vibrante, <strong>extremadamente dulce y aromática</strong>.</p>
+                        <div class="flex justify-center gap-2">
+                            <span class="bg-orange-100 text-orange-800 text-xs px-3 py-1 rounded-full font-bold">Naranja</span>
+                            <span class="bg-orange-100 text-orange-800 text-xs px-3 py-1 rounded-full font-bold">Muy Aromático</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Variedad 2: Honeydew -->
+                <div class="bg-white rounded-[2rem] overflow-hidden shadow-lg border-2 border-melon/20 reveal delay-100 hover:shadow-2xl transition-shadow group">
+                    <div class="h-48 bg-melon-leafLight flex items-center justify-center p-6 relative overflow-hidden">
+                        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+                        <svg viewBox="0 0 100 100" class="w-32 h-32 drop-shadow-2xl z-10 transform group-hover:scale-110 transition-transform duration-500"><use href="#svg-melon-entero"></use></svg>
+                    </div>
+                    <div class="p-8 text-center">
+                        <h3 class="font-display text-3xl text-gray-800 mb-2">Honeydew (Verde)</h3>
+                        <p class="text-sm font-bold text-melon-leaf uppercase mb-4 tracking-wider">El Rocío de Miel</p>
+                        <p class="text-gray-600 text-sm leading-relaxed mb-4">Fácil de identificar por su piel lisa y pálida. Su pulpa es de un color verde claro a blanco. Es el más dulce de todos los melones, con una <strong>textura jugosa y aterciopelada</strong>.</p>
+                        <div class="flex justify-center gap-2">
+                            <span class="bg-green-100 text-green-800 text-xs px-3 py-1 rounded-full font-bold">Verde Claro</span>
+                            <span class="bg-green-100 text-green-800 text-xs px-3 py-1 rounded-full font-bold">Ultra Dulce</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Variedad 3: Piel de Sapo -->
+                <div class="bg-white rounded-[2rem] overflow-hidden shadow-lg border-2 border-melon/20 reveal delay-200 hover:shadow-2xl transition-shadow group">
+                    <div class="h-48 bg-emerald-700 flex items-center justify-center p-6 relative overflow-hidden">
+                        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+                        <svg viewBox="0 0 100 100" class="w-32 h-32 drop-shadow-2xl z-10 transform group-hover:scale-110 transition-transform duration-500"><use href="#svg-melon-entero"></use></svg>
+                    </div>
+                    <div class="p-8 text-center">
+                        <h3 class="font-display text-3xl text-gray-800 mb-2">Piel de Sapo</h3>
+                        <p class="text-sm font-bold text-emerald-800 uppercase mb-4 tracking-wider">El Favorito Español</p>
+                        <p class="text-gray-600 text-sm leading-relaxed mb-4">Se llama así porque su piel gruesa es verde oscuro con manchas, similar a la de un sapo. Por dentro es blanco, muy crujiente y dulce. Su cáscara gruesa le da una <strong>larga vida post-cosecha</strong>.</p>
+                        <div class="flex justify-center gap-2">
+                            <span class="bg-emerald-100 text-emerald-800 text-xs px-3 py-1 rounded-full font-bold">Crujiente</span>
+                            <span class="bg-emerald-100 text-emerald-800 text-xs px-3 py-1 rounded-full font-bold">Larga Vida</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección de Cultivo: Tarjetas Ilustradas -->
+    <section id="procedimientos" class="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white to-melon-bg relative z-10">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row gap-12 items-center mb-16 reveal">
+                <div class="md:w-1/2">
+                    <h2 class="text-5xl font-display text-gray-800 tracking-wide mb-6">Plantando <span class="text-melon-leaf">Dulzura</span></h2>
+                    <p class="text-xl text-gray-600 font-semibold leading-relaxed">
+                        A diferencia de los árboles, el melón es una planta de guía o rastrera que se arrastra por el suelo. Estos son los secretos de su cultivo.
+                    </p>
+                </div>
+                <div class="md:w-1/2 flex justify-center">
+                     <svg viewBox="0 0 100 100" class="w-48 h-48 animate-float drop-shadow-2xl"><use href="#svg-melon-entero"></use></svg>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-white rounded-full p-4 flex items-center shadow-lg border-2 border-melon/20 reveal hover:scale-[1.02] transition-transform cursor-pointer group">
+                    <div class="w-24 h-24 rounded-full bg-melon-dark flex items-center justify-center flex-shrink-0 group-hover:bg-melon transition-colors">
+                        <i class="fa-solid fa-sun text-4xl text-white"></i>
+                    </div>
+                    <div class="ml-6 pr-6">
+                        <h3 class="font-display text-2xl text-melon-dark mb-1">1. Sol Pleno y Suelo Caliente</h3>
+                        <p class="text-gray-600 font-semibold">Necesita veranos largos y calurosos (mínimo 20°C a 30°C). Se siembra directo en la tierra en pequeños "montículos" para que la tierra esté más caliente y drene mejor el agua.</p>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-full p-4 flex items-center shadow-lg border-2 border-melon/20 reveal delay-100 hover:scale-[1.02] transition-transform cursor-pointer group ml-0 md:ml-12">
+                    <div class="w-24 h-24 rounded-full bg-melon-leaf flex items-center justify-center flex-shrink-0 group-hover:bg-melon-leafLight transition-colors">
+                        <i class="fa-solid fa-bug text-4xl text-white"></i>
+                    </div>
+                    <div class="ml-6 pr-6">
+                        <h3 class="font-display text-2xl text-melon-leaf mb-1">2. La Importancia de las Abejas</h3>
+                        <p class="text-gray-600 font-semibold text-sm leading-relaxed">Las flores del melón duran abiertas un solo día. Tienen flores macho y hembra por separado. <strong>Sin polinización de las abejas, ¡no hay fruta!</strong> Los agricultores a menudo ponen colmenas cerca.</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-full p-4 flex items-center shadow-lg border-2 border-melon/20 reveal delay-200 hover:scale-[1.02] transition-transform cursor-pointer group ml-0 md:ml-24">
+                    <div class="w-24 h-24 rounded-full bg-melon flex items-center justify-center flex-shrink-0 group-hover:bg-melon-dark transition-colors">
+                        <i class="fa-solid fa-droplet-slash text-4xl text-white"></i>
+                    </div>
+                    <div class="ml-6 pr-6">
+                        <h3 class="font-display text-2xl text-melon mb-1">3. Estrés Hídrico Final</h3>
+                        <p class="text-gray-600 font-semibold">Necesita mucha agua para crecer. Sin embargo, el secreto para un melón dulce es <strong>detener o reducir el riego semanas antes de la cosecha</strong> para concentrar los azúcares y evitar que exploten.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECCIÓN: Beneficios Nutricionales -->
+    <section id="nutricion" class="py-24 px-4 sm:px-6 lg:px-8 bg-melon-leaf text-white relative overflow-hidden z-10">
+        <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/leaves.png')]"></div>
+        <div class="max-w-7xl mx-auto relative z-20">
+            <div class="text-center mb-16 reveal">
+                <h2 class="text-5xl font-display text-melon-light mb-4 tracking-wide">La Esfera <span class="text-white">Hidratante</span></h2>
+                <p class="text-xl font-semibold max-w-2xl mx-auto text-gray-200">Bajo en calorías pero altísimo en nutrientes, el melón es el postre ideal que cuida de tu cuerpo.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Beneficio 1 -->
+                <div class="bg-white/10 backdrop-blur-md rounded-3xl p-6 text-center border border-white/20 hover:bg-white/20 transition-colors reveal">
+                    <div class="w-16 h-16 bg-melon-light rounded-full flex items-center justify-center mx-auto mb-4 text-melon-dark text-2xl shadow-lg">
+                        <i class="fa-solid fa-glass-water"></i>
+                    </div>
+                    <h4 class="font-display text-2xl mb-2">Hidratación Pura</h4>
+                    <p class="text-sm text-gray-200">El 90% del melón es agua. Su consumo refresca el organismo y ayuda a mantener una hidratación óptima en verano.</p>
+                </div>
+                <!-- Beneficio 2 -->
+                <div class="bg-white/10 backdrop-blur-md rounded-3xl p-6 text-center border border-white/20 hover:bg-white/20 transition-colors reveal delay-100">
+                    <div class="w-16 h-16 bg-melon-light rounded-full flex items-center justify-center mx-auto mb-4 text-melon-dark text-2xl shadow-lg">
+                        <i class="fa-solid fa-eye"></i>
+                    </div>
+                    <h4 class="font-display text-2xl mb-2">Vitamina A</h4>
+                    <p class="text-sm text-gray-200">La variedad Cantalupo, gracias a su color naranja, está cargada de betacarotenos que fortalecen la salud visual.</p>
+                </div>
+                <!-- Beneficio 3 -->
+                <div class="bg-white/10 backdrop-blur-md rounded-3xl p-6 text-center border border-white/20 hover:bg-white/20 transition-colors reveal delay-200">
+                    <div class="w-16 h-16 bg-melon-light rounded-full flex items-center justify-center mx-auto mb-4 text-melon-dark text-2xl shadow-lg">
+                        <i class="fa-solid fa-heart-pulse"></i>
+                    </div>
+                    <h4 class="font-display text-2xl mb-2">Potasio</h4>
+                    <p class="text-sm text-gray-200">Rico en potasio, ayuda a mantener estable la presión arterial y evita los calambres musculares tras hacer ejercicio.</p>
+                </div>
+                <!-- Beneficio 4 -->
+                <div class="bg-white/10 backdrop-blur-md rounded-3xl p-6 text-center border border-white/20 hover:bg-white/20 transition-colors reveal delay-300">
+                    <div class="w-16 h-16 bg-melon-light rounded-full flex items-center justify-center mx-auto mb-4 text-melon-dark text-2xl shadow-lg">
+                        <i class="fa-solid fa-shield-virus"></i>
+                    </div>
+                    <h4 class="font-display text-2xl mb-2">Vitamina C</h4>
+                    <p class="text-sm text-gray-200">Aporta casi el 100% de la vitamina C diaria requerida, promoviendo la producción de colágeno y blindando defensas.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MINIJUEGO ILUSTRADO -->
+    <section id="juego" class="py-24 px-4 sm:px-6 lg:px-8 bg-melon text-white relative z-20">
+        <div class="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCI+CiAgPGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjIiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMSkiLz4KPC9zdmc+')]"></div>
+        
+        <div class="max-w-4xl mx-auto relative z-10 bg-white/10 backdrop-blur-md p-8 md:p-12 rounded-[3rem] border-4 border-white/30 shadow-2xl">
+            <div class="text-center mb-10 reveal">
+                <h2 class="text-5xl md:text-6xl font-display font-bold mb-4 drop-shadow-lg text-white tracking-widest">
+                    ¡Fiebre <span class="text-melon-dark">Melonera</span>!
+                </h2>
+                <p class="text-2xl font-semibold mb-8">
+                    Atrapa los <strong class="text-melon-light">Melones Jugosos</strong> <svg viewBox="0 0 100 100" class="w-8 h-8 inline"><use href="#svg-melon-cortado"></use></svg><br>
+                    ¡Esquiva los <strong class="text-red-900 bg-red-100 px-2 py-0.5 rounded">Pasados</strong>! <svg viewBox="0 0 100 100" class="w-8 h-8 inline"><use href="#svg-melon-malo"></use></svg>
+                </p>
+                
+                <div class="flex justify-center gap-8 mb-8">
+                    <div class="bg-white text-melon-dark px-8 py-4 rounded-3xl shadow-inner text-center border-b-4 border-melon-light">
+                        <span class="block text-sm uppercase font-bold text-gray-400">Tiempo</span>
+                        <span id="timerDisplay" class="text-4xl font-display">20s</span>
+                    </div>
+                    <div class="bg-white text-melon-leaf px-8 py-4 rounded-3xl shadow-inner text-center border-b-4 border-melon">
+                        <span class="block text-sm uppercase font-bold text-gray-400">Puntos</span>
+                        <span id="scoreDisplay" class="text-4xl font-display">0</span>
+                    </div>
+                </div>
+                
+                <button id="startBtn" onclick="startGame()" class="bg-white text-melon-dark font-display text-3xl px-12 py-4 rounded-full hover:scale-110 hover:shadow-2xl transition-all shadow-lg animate-pulse">
+                    ¡A Cosechar!
+                </button>
+            </div>
+
+            <!-- Área del Minijuego -->
+            <div id="game-area" class="w-full h-[450px] mx-auto border-8 border-white/50 hidden">
+                <!-- Se cambia la copa del árbol a un "suelo de enredadera" en la parte inferior para que parezca que caen / salen -->
+                <div class="absolute bottom-[-100px] left-[-50px] right-[-50px] height-[250px] bg-melon-leaf rounded-[50%] shadow-inner z-10 opacity-40"></div>
+                
+                <div id="game-overlay" class="absolute inset-0 bg-melon-leaf/90 flex flex-col items-center justify-center hidden z-30 backdrop-blur-sm">
+                    <svg viewBox="0 0 100 100" class="w-32 h-32 mb-4 drop-shadow-2xl animate-wiggle"><use href="#svg-melon-cortado"></use></svg>
+                    <h3 class="text-6xl font-display text-white mb-2 tracking-wide">¡Cosecha Lista!</h3>
+                    <p class="text-3xl text-melon-light mb-8 font-bold">Puntuación: <span id="finalScore" class="text-white">0</span></p>
+                    <button onclick="startGame()" class="bg-white text-melon-dark font-display text-2xl px-10 py-3 rounded-full hover:bg-melon-light hover:text-melon-dark transition-colors shadow-xl">Jugar de Nuevo</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Cosecha y Postcosecha Visual -->
+    <section id="cuidados" class="py-24 px-4 sm:px-6 lg:px-8 bg-white z-10 relative">
+        <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-16 items-center">
+            
+            <div class="reveal relative">
+                <div class="absolute -top-10 -left-10 w-40 h-40 bg-melon-light/60 rounded-full blur-2xl"></div>
+                <!-- Ilustración Gigante para mantener estética perfecta -->
+                <div class="relative z-10 h-[450px] w-full flex items-center justify-center">
+                    <svg viewBox="0 0 100 100" class="w-80 h-80 drop-shadow-2xl z-10 transform hover:scale-110 transition-transform duration-500"><use href="#svg-melon-cortado"></use></svg>
+                    <svg viewBox="0 0 100 100" class="absolute -bottom-12 -left-4 w-56 h-56 drop-shadow-xl z-0 opacity-70 transform -rotate-12"><use href="#svg-melon-entero"></use></svg>
+                </div>
+                
+                <!-- Tarjeta Flotante -->
+                <div class="absolute -bottom-8 -right-8 bg-white p-6 rounded-3xl shadow-xl z-20 flex items-center gap-4 animate-float border-2 border-melon/10">
+                    <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center">
+                        <i class="fa-solid fa-nose-line text-orange-500 text-2xl"></i>
+                    </div>
+                    <div>
+                        <p class="font-display text-xl text-gray-800">Usa tu Nariz</p>
+                        <p class="text-sm text-gray-500 font-bold">Un buen melón debe oler dulce.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="reveal delay-200">
+                <h2 class="text-5xl font-display text-gray-800 mb-8 leading-tight">Las Reglas de Oro en la <span class="text-melon-dark">Cosecha</span></h2>
+                
+                <div class="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-0 md:before:translate-x-0 before:h-full before:w-1 before:bg-gradient-to-b before:from-melon-light before:to-melon-dark">
+                    
+                    <div class="relative flex items-start group">
+                        <div class="flex items-center justify-center w-10 h-10 rounded-full bg-melon-light text-melon-dark font-bold shadow shrink-0 z-10 border-4 border-white">
+                            <i class="fa-solid fa-leaf"></i>
+                        </div>
+                        <div class="ml-6 mt-1">
+                            <h4 class="font-display text-2xl text-gray-800">El Desprendimiento (Slip)</h4>
+                            <p class="text-gray-600 font-semibold mt-1">A diferencia de otras frutas, los melones Cantalupo te "avisan" cuando están listos. El tallo desarrolla una grieta natural (Slip) y se separa de la guía casi sin esfuerzo.</p>
+                        </div>
+                    </div>
+
+                    <div class="relative flex items-start group">
+                        <div class="flex items-center justify-center w-10 h-10 rounded-full bg-melon text-white font-bold shadow shrink-0 z-10 border-4 border-white">
+                            <i class="fa-solid fa-palette"></i>
+                        </div>
+                        <div class="ml-6 mt-1">
+                            <h4 class="font-display text-2xl text-gray-800">Mancha de Suelo</h4>
+                            <p class="text-gray-600 font-semibold mt-1">Debido a que crecen en la tierra, la parte del melón que toca el suelo debe cambiar de un color blanco o verdoso a un tono amarillento o crema; esto indica madurez interior.</p>
+                        </div>
+                    </div>
+
+                    <div class="relative flex items-start group">
+                        <div class="flex items-center justify-center w-10 h-10 rounded-full bg-melon-dark text-white font-bold shadow shrink-0 z-10 border-4 border-white">
+                            <i class="fa-solid fa-wind"></i>
+                        </div>
+                        <div class="ml-6 mt-1">
+                            <h4 class="font-display text-2xl text-gray-800">Aroma en el Extremo</h4>
+                            <p class="text-gray-600 font-semibold mt-1">El "polo" opuesto a donde estaba el tallo se ablanda ligeramente. Al oler esta zona, debe despedir un aroma deliciosamente dulce. Si no huele a nada, no está listo.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer con los Datos Escolares -->
+    <footer class="bg-melon-leaf text-white pt-16 pb-8 relative overflow-hidden z-10">
+        <div class="absolute bottom-0 right-0 opacity-10 transform translate-x-1/4 translate-y-1/4 pointer-events-none">
+            <svg viewBox="0 0 100 100" class="w-96 h-96"><use href="#svg-melon-entero"></use></svg>
+        </div>
+        
+        <div class="max-w-7xl mx-auto px-4 flex flex-col items-center text-center relative z-10">
+            <div class="w-20 h-20 mb-6 bg-white rounded-full flex items-center justify-center animate-wiggle shadow-xl">
+                <svg viewBox="0 0 100 100" class="w-12 h-12 drop-shadow-md"><use href="#svg-melon-cortado"></use></svg>
+            </div>
+            <span class="font-display text-4xl mb-4">MundoMelón</span>
+            <p class="text-melon-light font-bold text-lg max-w-md mx-auto mb-8">El portal interactivo dedicado a la joya más refrescante del verano.</p>
+            
+            <!-- TARJETA DE DATOS ACADÉMICOS -->
+            <div class="mt-4 mb-6 bg-white/10 p-8 rounded-[2rem] backdrop-blur-md border border-white/20 w-full max-w-4xl mx-auto shadow-2xl flex flex-col md:flex-row justify-between text-left gap-8 transform hover:scale-[1.02] transition-transform duration-300 relative overflow-hidden">
+                
+                <!-- Adorno de la tarjeta -->
+                <div class="absolute -right-10 -top-10 opacity-20 pointer-events-none">
+                    <i class="fa-solid fa-graduation-cap text-9xl text-melon-light"></i>
+                </div>
+
+                <div class="flex items-start gap-5 relative z-10">
+                    <div class="w-16 h-16 bg-melon rounded-full flex items-center justify-center flex-shrink-0 shadow-lg border-2 border-white/30">
+                        <i class="fa-solid fa-user-graduate text-white text-3xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-melon-light font-display text-2xl mb-1 tracking-wide">Datos del Alumno</h4>
+                        <!-- NOMBRE DEL ALUMNO -->
+                        <p class="font-bold text-2xl text-white">Samuel Concepción Rasgado</p>
+                        <div class="flex items-center gap-2 mt-2">
+                            <span class="bg-white/20 px-4 py-1 rounded-full text-sm font-bold text-white shadow-sm border border-white/10">Grupo: 6D</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="hidden md:block w-px bg-white/20 self-stretch relative z-10"></div>
+                
+                <div class="flex items-start gap-5 relative z-10">
+                    <div class="w-16 h-16 bg-melon-dark rounded-full flex items-center justify-center flex-shrink-0 shadow-lg border-2 border-white/30">
+                        <i class="fa-solid fa-chalkboard-user text-white text-2xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-melon-light font-display text-2xl mb-1 tracking-wide">Datos Académicos</h4>
+                        <!-- DOCENTE Y MATERIA -->
+                        <p class="font-bold text-xl text-white">Docente: Martha Paxtian Diaz</p>
+                        <div class="flex items-center gap-2 mt-2">
+                            <span class="bg-white/20 px-4 py-1 rounded-full text-sm font-bold text-white shadow-sm border border-white/10">Materia: EPHE</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- BOTÓN DE DESCARGA FINAL -->
+            <div class="mb-10 w-full max-w-4xl mx-auto flex justify-center">
+                <button onclick="downloadHTML()" class="bg-melon-dark hover:bg-melon text-white px-8 py-3 rounded-full font-bold text-xl transition-all shadow-xl flex items-center gap-3 transform hover:scale-105 border-4 border-white/20">
+                    <i class="fa-solid fa-file-arrow-down text-2xl"></i> Descargar Proyecto (HTML)
+                </button>
+            </div>
+            
+            <div class="border-t border-white/20 w-full pt-8 text-white/50 text-sm font-bold flex flex-col md:flex-row justify-between items-center gap-4 px-6">
+                <span>&copy; 2026 Mundo Melón. Proyecto Escolar.</span>
+                <span>Desarrollado con <i class="fa-solid fa-heart text-melon-light"></i> para la materia de EPHE</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- SCRIPTS -->
+    <script>
+        // --- FUNCIÓN PARA DESCARGAR EL HTML ---
+        function downloadHTML() {
+            // Obtenemos todo el contenido de la etiqueta <html>
+            const htmlContent = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+            
+            // Creamos un Blob con el contenido de texto
+            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            
+            // Creamos una etiqueta <a> invisible para forzar la descarga
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'Proyecto_Mundo_Melon_Samuel.html'; // Nombre del archivo actualizado
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        // 1. Navbar Scroll Effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('shadow-md', 'py-0');
+                navbar.classList.remove('h-24');
+                navbar.classList.add('h-16');
+            } else {
+                navbar.classList.remove('shadow-md', 'py-0', 'h-16');
+                navbar.classList.add('h-24');
+            }
+        });
+
+        // 2. Efecto Reveal on Scroll
+        function reveal() {
+            var reveals = document.querySelectorAll(".reveal");
+            for (var i = 0; i < reveals.length; i++) {
+                var windowHeight = window.innerHeight;
+                var elementTop = reveals[i].getBoundingClientRect().top;
+                if (elementTop < windowHeight - 100) {
+                    reveals[i].classList.add("active");
+                }
+            }
+        }
+        window.addEventListener("scroll", reveal);
+        reveal();
+
+        // 3. Generador de Lluvia de Melones (Background)
+        function createFallingItems() {
+            const container = document.getElementById('falling-items-container');
+            const numItems = 12; 
+
+            for (let i = 0; i < numItems; i++) {
+                const item = document.createElement('div');
+                item.className = 'falling-item';
+                
+                // Mezcla de melones enteros y cortados
+                const isCut = Math.random() > 0.6;
+                const size = Math.random() * 50 + 40; 
+                
+                item.innerHTML = `<svg viewBox="0 0 100 100" style="width:${size}px; height:${size}px;" class="drop-shadow-lg"><use href="#svg-melon-${isCut ? 'cortado' : 'entero'}"></use></svg>`;
+                
+                item.style.left = `${Math.random() * 90}vw`;
+                item.style.animationDuration = `${Math.random() * 15 + 10}s`;
+                item.style.animationDelay = `-${Math.random() * 20}s`;
+                
+                container.appendChild(item);
+            }
+        }
+        createFallingItems();
+
+        // 4. Lógica del Minijuego "Fiebre Melonera"
+        let score = 0;
+        let timeLeft = 20;
+        let gameInterval;
+        let spawnInterval;
+        const gameArea = document.getElementById('game-area');
+        const startBtn = document.getElementById('startBtn');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const overlay = document.getElementById('game-overlay');
+        const finalScore = document.getElementById('finalScore');
+
+        function startGame() {
+            score = 0;
+            timeLeft = 20;
+            scoreDisplay.innerText = score;
+            timerDisplay.innerText = timeLeft + "s";
+            
+            startBtn.classList.add('hidden');
+            gameArea.classList.remove('hidden');
+            overlay.classList.add('hidden');
+            
+            document.querySelectorAll('.game-item').forEach(m => m.remove());
+
+            gameInterval = setInterval(updateTimer, 1000);
+            spawnInterval = setInterval(spawnItem, 550); // Velocidad ajustada
+        }
+
+        function updateTimer() {
+            timeLeft--;
+            timerDisplay.innerText = timeLeft + "s";
+            
+            if (timeLeft <= 0) {
+                endGame();
+            }
+        }
+
+        function endGame() {
+            clearInterval(gameInterval);
+            clearInterval(spawnInterval);
+            document.querySelectorAll('.game-item').forEach(m => m.remove());
+            finalScore.innerText = score;
+            overlay.classList.remove('hidden');
+        }
+
+        function spawnItem() {
+            const item = document.createElement('div');
+            item.className = 'game-item';
+            
+            // 35% de probabilidad de que sea un melón malo/pasado
+            const isBad = Math.random() < 0.35;
+            // Si es bueno, hay 50% probabilidad que caiga entero o cortado
+            const type = isBad ? 'malo' : (Math.random() > 0.5 ? 'entero' : 'cortado');
+            
+            item.innerHTML = `<svg viewBox="0 0 100 100" class="w-full h-full pointer-events-none"><use href="#svg-melon-${type}"></use></svg>`;
+
+            const maxX = gameArea.clientWidth - 80;
+            const maxY = gameArea.clientHeight - 100;
+            const randomX = Math.floor(Math.random() * maxX) + 10;
+            const randomY = Math.floor(Math.random() * maxY) + 40; 
+
+            item.style.left = randomX + 'px';
+            item.style.top = randomY + 'px';
+
+            item.onmousedown = function(e) {
+                if(isBad) {
+                    score -= 5;
+                    showFloatingText("-5", e.clientX, e.clientY, "text-red-500");
+                    gameArea.classList.add('bg-red-300');
+                    setTimeout(() => gameArea.classList.remove('bg-red-300'), 150);
+                } else {
+                    score += 10;
+                    showFloatingText("+10", e.clientX, e.clientY, "text-melon-dark");
+                }
+                scoreDisplay.innerText = score;
+                
+                item.classList.add('splat-effect');
+                setTimeout(() => item.remove(), 400);
+            };
+
+            gameArea.appendChild(item);
+
+            // Desaparecer automáticamente si no se hace clic
+            setTimeout(() => {
+                if(item.parentNode && !item.classList.contains('splat-effect')) {
+                    item.style.opacity = '0';
+                    item.style.transform = 'scale(0) translateY(50px)';
+                    setTimeout(() => { if(item.parentNode) item.remove(); }, 300);
+                }
+            }, 1200 + Math.random() * 1000);
+        }
+
+        function showFloatingText(text, x, y, colorClass) {
+            const floatText = document.createElement('div');
+            floatText.innerText = text;
+            floatText.className = `floating-score ${colorClass}`;
+            
+            const rect = gameArea.getBoundingClientRect();
+            floatText.style.left = (x - rect.left - 20) + 'px';
+            floatText.style.top = (y - rect.top - 20) + 'px';
+
+            gameArea.appendChild(floatText);
+            setTimeout(() => floatText.remove(), 1000);
+        }
+    </script>
+</body>
+</html>
