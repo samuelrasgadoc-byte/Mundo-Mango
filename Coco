@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>El Mundo del Coco | Historia, Cultivo y Cosecha</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Chewy&family=Nunito:wght@400;600;800;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        coco: {
+                            light: '#F5F5DC',    /* Crema / Pulpa blanca */
+                            DEFAULT: '#8B5A2B',  /* Café cáscara de coco */
+                            dark: '#5C3A21',     /* Café muy oscuro */
+                            leaf: '#2d6a4f',     /* Verde palmera oscuro */
+                            leafLight: '#40916c',/* Verde palmera claro */
+                            bg: '#FAFAFA',       /* Blanco sutil de fondo */
+                            water: '#E0F6FF'     /* Tono azul agua de coco */
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Nunito', 'sans-serif'],
+                        display: ['Chewy', 'cursive'],
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'spin-slow': 'spin 12s linear infinite',
+                        'wiggle': 'wiggle 1.5s ease-in-out infinite',
+                        'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0) rotate(0deg)' },
+                            '50%': { transform: 'translateY(-20px) rotate(5deg)' },
+                        },
+                        wiggle: {
+                            '0%, 100%': { transform: 'rotate(-5deg)' },
+                            '50%': { transform: 'rotate(5deg)' },
+                        },
+                        fall: {
+                            '0%': { transform: 'translateY(-10vh) rotate(0deg) scale(0.8)', opacity: '0' },
+                            '10%': { opacity: '0.6' },
+                            '90%': { opacity: '0.6' },
+                            '100%': { transform: 'translateY(110vh) rotate(360deg) scale(1.2)', opacity: '0' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Cursor Personalizado (Tono Coco) */
+        body {
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="%235C3A21"><path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4Z"/></svg>') 12 12, auto;
+        }
+        
+        a, button, .cursor-pointer {
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="%232d6a4f"><path d="M12,2L15,9L22,12L15,15L12,22L9,15L2,12L9,9L12,2Z"/></svg>') 12 12, pointer !important;
+        }
+
+        /* Animaciones Reveal */
+        .reveal {
+            opacity: 0;
+            transform: translateY(50px) scale(0.9);
+            transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+        .delay-100 { transition-delay: 100ms; }
+        .delay-200 { transition-delay: 200ms; }
+        .delay-300 { transition-delay: 300ms; }
+
+        /* Contenedor de Lluvia de Cocos */
+        #falling-items-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .falling-item {
+            position: absolute;
+            animation: fall linear infinite;
+        }
+
+        /* Degradados */
+        .text-gradient {
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-image: linear-gradient(to right, #5C3A21, #8B5A2B, #2d6a4f);
+        }
+
+        /* Estilos del Minijuego */
+        #game-area {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(180deg, #87CEEB 0%, #E0F6FF 100%);
+            border-radius: 2rem;
+            box-shadow: inset 0 10px 30px rgba(0,0,0,0.15);
+            cursor: crosshair;
+        }
+        .tree-canopy {
+            position: absolute;
+            top: -100px;
+            left: -50px;
+            right: -50px;
+            height: 250px;
+            background: #2d6a4f;
+            border-radius: 50%;
+            box-shadow: 
+                inset -20px -20px 60px rgba(0,0,0,0.3),
+                0 20px 40px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+        .tree-canopy::after {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            left: 20%;
+            width: 60%;
+            height: 100px;
+            background: #40916c;
+            border-radius: 50%;
+            z-index: -1;
+        }
+        .game-item {
+            position: absolute;
+            width: 60px;
+            height: 60px; 
+            cursor: pointer;
+            z-index: 10;
+            user-select: none;
+            transition: transform 0.1s;
+            filter: drop-shadow(0 5px 5px rgba(0,0,0,0.3));
+        }
+        .game-item:active {
+            transform: scale(0.7) rotate(15deg);
+        }
+        .floating-score {
+            position: absolute;
+            font-family: 'Chewy', cursive;
+            font-size: 2.5rem;
+            pointer-events: none;
+            animation: floatUp 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            z-index: 20;
+            text-shadow: 2px 2px 0 #fff, -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(0.5); opacity: 0; }
+            50% { opacity: 1; transform: translateY(-30px) scale(1.2); }
+            100% { transform: translateY(-60px) scale(1); opacity: 0; }
+        }
+        .splat-effect {
+            animation: splat 0.4s ease-out forwards;
+        }
+        @keyframes splat {
+            0% { transform: scale(1); opacity: 1; filter: brightness(1); }
+            50% { transform: scale(1.5); opacity: 0.8; filter: brightness(1.5); }
+            100% { transform: scale(2); opacity: 0; filter: brightness(2); }
+        }
+
+        /* Blob Background */
+        .blob-shape {
+            border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+            animation: blob-morph 8s ease-in-out infinite;
+        }
+        @keyframes blob-morph {
+            0%, 100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+            34% { border-radius: 70% 30% 50% 50% / 30% 30% 70% 70%; }
+            67% { border-radius: 100% 60% 60% 100% / 100% 100% 60% 60%; }
+        }
+    </style>
+</head>
+<body class="bg-coco-bg text-gray-800 antialiased overflow-x-hidden selection:bg-coco selection:text-white">
+
+    <!-- DEFS para Ilustraciones SVG Reutilizables (Temática Coco) -->
+    <svg style="display: none;">
+        <defs>
+            <!-- Coco Entero (Café) -->
+            <g id="svg-coco-entero">
+                <circle cx="50" cy="50" r="45" fill="#8B5A2B"/>
+                <circle cx="48" cy="48" r="40" fill="#9C6B38"/>
+                <!-- Tres "ojos" del coco -->
+                <circle cx="35" cy="35" r="5" fill="#5C3A21"/>
+                <circle cx="65" cy="35" r="5" fill="#5C3A21"/>
+                <circle cx="50" cy="25" r="5" fill="#5C3A21"/>
+                <!-- Brillo sutil -->
+                <path d="M15,50 A35,35 0 0,1 50,15 A35,35 0 0,0 15,50 Z" fill="#FFFFFF" opacity="0.2"/>
+                <!-- Fibras del coco -->
+                <path d="M 20 70 Q 30 65 40 75" stroke="#5C3A21" stroke-width="2" fill="none" opacity="0.5"/>
+                <path d="M 60 70 Q 70 65 80 75" stroke="#5C3A21" stroke-width="2" fill="none" opacity="0.5"/>
+                <path d="M 30 85 Q 50 75 70 85" stroke="#5C3A21" stroke-width="2" fill="none" opacity="0.5"/>
+            </g>
+            
+            <!-- Coco Cortado a la Mitad (Mostrando Pulpa y Agua) -->
+            <g id="svg-coco-cortado">
+                <!-- Cáscara exterior -->
+                <path d="M 5 50 A 45 45 0 0 0 95 50 Z" fill="#8B5A2B"/>
+                <!-- Pulpa blanca gruesa -->
+                <path d="M 12 50 A 38 38 0 0 0 88 50 Z" fill="#F5F5DC"/>
+                <!-- Hueco con agua de coco -->
+                <path d="M 25 50 A 25 25 0 0 0 75 50 Z" fill="#E0F6FF"/>
+                <!-- Borde quebrado superior -->
+                <path d="M 5 50 Q 25 40 50 50 T 95 50" fill="none" stroke="#F5F5DC" stroke-width="6"/>
+                <path d="M 5 50 Q 25 40 50 50 T 95 50" fill="none" stroke="#8B5A2B" stroke-width="2"/>
+                <!-- Fibras exteriores -->
+                <path d="M 20 75 Q 25 85 30 80" stroke="#5C3A21" stroke-width="2" fill="none" opacity="0.5"/>
+                <path d="M 70 75 Q 75 85 80 80" stroke="#5C3A21" stroke-width="2" fill="none" opacity="0.5"/>
+            </g>
+
+            <!-- Coco Malo/Podrido (Para el Minijuego) -->
+            <g id="svg-coco-malo">
+                <circle cx="50" cy="50" r="45" fill="#5C3A21"/>
+                <circle cx="48" cy="48" r="40" fill="#4A2D17"/>
+                <!-- Ojos -->
+                <circle cx="35" cy="35" r="5" fill="#2d6a4f"/>
+                <circle cx="65" cy="35" r="5" fill="#2d6a4f"/>
+                <circle cx="50" cy="25" r="5" fill="#2d6a4f"/>
+                <!-- Manchas de moho verde -->
+                <circle cx="70" cy="70" r="10" fill="#2d6a4f" opacity="0.8"/>
+                <circle cx="30" cy="65" r="8" fill="#40916c" opacity="0.8"/>
+                <!-- Grieta gigante -->
+                <path d="M 40 20 L 45 45 L 35 60 L 50 90" stroke="#111" stroke-width="3" fill="none"/>
+            </g>
+        </defs>
+    </svg>
+
+    <!-- Contenedor Lluvia Animada -->
+    <div id="falling-items-container"></div>
+
+        <!-- Navegación: ACTUALIZADA PARA CONECTAR HTMLs -->
+    <nav class="fixed w-full z-50 bg-white/80 backdrop-blur-xl shadow-sm transition-all duration-300 border-b border-melon/20" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-24">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center gap-3 cursor-pointer group" onclick="window.scrollTo(0,0)">
+                    <div class="w-12 h-12 relative animate-wiggle">
+                        <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md"><use href="#svg-melon-cortado"></use></svg>
+                    </div>
+                    <span class="font-display tracking-wide text-3xl text-gray-800">Mundo<span class="text-melon-dark">Melón</span></span>
+                </div>
+                
+                <!-- Menú de Enlaces a Otros Archivos HTML -->
+                <div class="hidden lg:flex space-x-6 items-center bg-white/50 px-8 py-3 rounded-full border border-gray-100 shadow-sm text-sm font-bold">
+                    <a href="Inicio.html" class="text-gray-700 hover:text-melon-dark transition-all hover:scale-105">Inicio</a>
+                    <a href="Mango.html" class="text-gray-700 hover:text-melon-dark transition-all hover:scale-105">Mango</a>
+                    <a href="Limon.html" class="text-gray-700 hover:text-melon-dark transition-all hover:scale-105">Limón</a>
+                    <a href="Papaya.html" class="text-gray-700 hover:text-melon-dark transition-all hover:scale-105">Papaya</a>
+                    <a href="Coco.html" class="text-gray-700 hover:text-melon-dark transition-all hover:scale-105">Coco</a>
+                    <!-- Fruta Actual Highlighted -->
+                    <a href="Melon.html" class="text-melon-dark border-b-2 border-melon-dark pb-1 scale-105">Melón</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="relative min-h-screen flex items-center justify-center pt-24 overflow-hidden z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full grid md:grid-cols-2 gap-12 items-center">
+            
+            <div class="text-center md:text-left reveal relative z-20">
+                <div class="inline-flex items-center gap-2 py-2 px-4 rounded-full bg-coco-light/50 text-coco-dark font-bold text-sm tracking-widest uppercase mb-6 border border-coco/30 shadow-sm">
+                    <i class="fa-solid fa-tree text-coco-dark"></i> El Árbol de la Vida
+                </div>
+                <h1 class="text-6xl lg:text-8xl font-display text-gray-900 mb-4 leading-none drop-shadow-sm">
+                    La Joya de <br> <span class="text-gradient drop-shadow-md">los Océanos</span>
+                </h1>
+                <p class="text-xl text-gray-600 mb-10 font-semibold max-w-lg mx-auto md:mx-0 leading-relaxed">
+                    Descubre el arte de cultivar, cosechar y aprovechar el coco. Desde su refrescante agua hasta su blanca pulpa, explora la historia de la palmera que conquistó las playas del mundo entero.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-5 justify-center md:justify-start">
+                    <a href="#variedades" class="bg-coco-dark text-white px-8 py-4 rounded-full font-bold text-xl hover:bg-coco transform hover:-translate-y-2 transition-all shadow-xl hover:shadow-2xl text-center flex items-center justify-center gap-3">
+                        <i class="fa-solid fa-magnifying-glass"></i> Explorar Variedades
+                    </a>
+                    <a href="#juego" class="bg-white border-4 border-coco text-coco-dark px-8 py-4 rounded-full font-bold text-xl hover:bg-coco-light/40 transform hover:-translate-y-2 transition-all shadow-lg text-center flex items-center justify-center gap-3">
+                        <svg viewBox="0 0 100 100" class="w-6 h-6"><use href="#svg-coco-entero"></use></svg> Cosechar Ahora
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Composición Ilustrada Hero -->
+            <div class="relative reveal delay-200 h-[500px] flex items-center justify-center hidden md:flex">
+                <div class="absolute inset-0 bg-coco-light/80 blob-shape -z-10 transform rotate-12 scale-110"></div>
+                <div class="absolute inset-0 bg-coco-leafLight/20 blob-shape -z-10 transform -rotate-12 scale-100 delay-150"></div>
+                
+                <div class="relative w-80 h-80 z-20 animate-float">
+                    <!-- Ilustración Principal Gigante -->
+                    <div class="w-full h-full relative z-10 flex items-center justify-center transform rotate-6 hover:rotate-0 transition-transform duration-500">
+                        <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-2xl"><use href="#svg-coco-cortado"></use></svg>
+                    </div>
+                    
+                    <!-- Ilustraciones Flotantes -->
+                    <div class="absolute -top-12 -right-12 w-32 h-32 animate-wiggle" style="animation-duration: 3s;">
+                        <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-xl"><use href="#svg-coco-entero"></use></svg>
+                    </div>
+                    <div class="absolute -bottom-10 -left-10 w-24 h-24 animate-wiggle" style="animation-duration: 2.5s; animation-direction: reverse;">
+                        <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-xl transform -scale-x-100"><use href="#svg-coco-entero"></use></svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Perfil Botánico -->
+    <section class="py-10 bg-coco-leaf text-white relative z-20 border-y-4 border-coco shadow-[0_0_30px_rgba(0,0,0,0.15)]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-around items-center gap-8 text-center">
+            <div class="reveal">
+                <span class="block text-coco-light font-bold uppercase tracking-widest text-xs mb-2"><i class="fa-solid fa-tag mr-1"></i> Nombre Común</span>
+                <h3 class="text-4xl font-display tracking-wide drop-shadow-sm">Coco / Cocotero</h3>
+            </div>
+            <div class="hidden md:block w-px h-16 bg-white/20 reveal delay-100"></div>
+            <div class="reveal delay-100">
+                <span class="block text-coco-light font-bold uppercase tracking-widest text-xs mb-2"><i class="fa-solid fa-microscope mr-1"></i> Nombre Científico</span>
+                <h3 class="text-4xl font-display tracking-wide italic drop-shadow-sm">Cocos nucifera</h3>
+            </div>
+            <div class="hidden md:block w-px h-16 bg-white/20 reveal delay-200"></div>
+            <div class="reveal delay-200">
+                <span class="block text-coco-light font-bold uppercase tracking-widest text-xs mb-2"><i class="fa-solid fa-leaf mr-1"></i> Familia Botánica</span>
+                <h3 class="text-4xl font-display tracking-wide drop-shadow-sm">Arecaceae</h3>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección de Historia Ilustrada -->
+    <section id="historia" class="py-24 px-4 sm:px-6 lg:px-8 bg-white relative z-10">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-20 reveal">
+                <h2 class="text-5xl font-display text-gray-800 tracking-wide">Historia <span class="text-coco-dark">Oceánica</span></h2>
+                <div class="w-24 h-1 bg-coco mx-auto mt-4 rounded-full"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                <div class="bg-coco-bg rounded-3xl p-8 border-2 border-coco-light/80 shadow-xl hover:-translate-y-4 transition-transform duration-300 reveal group">
+                    <div class="h-32 flex items-center justify-center mb-6">
+                        <i class="fa-solid fa-water text-6xl text-coco-leaf group-hover:scale-125 transition-transform duration-500"></i>
+                    </div>
+                    <h3 class="font-display text-3xl text-gray-800 mb-3 text-center">Navegantes Naturales</h3>
+                    <p class="text-gray-600 text-center font-semibold">El coco se originó en la región Indo-Pacífica. Su cáscara fibrosa e impermeable le permitía flotar a través de los océanos durante meses sin perder su capacidad de germinar al llegar a tierra firme.</p>
+                </div>
+
+                <div class="bg-coco-bg rounded-3xl p-8 border-2 border-coco-light/80 shadow-xl hover:-translate-y-4 transition-transform duration-300 reveal delay-100 group">
+                    <div class="h-32 flex items-center justify-center mb-6">
+                        <i class="fa-solid fa-sailboat text-6xl text-coco-dark group-hover:scale-125 transition-transform duration-500"></i>
+                    </div>
+                    <h3 class="font-display text-3xl text-gray-800 mb-3 text-center">Expansión Humana</h3>
+                    <p class="text-gray-600 text-center font-semibold">Los antiguos pueblos austronesios lo llevaron en sus canoas por todo el Pacífico. Más tarde, marineros árabes y europeos utilizaron su agua como fuente vital de hidratación en viajes largos.</p>
+                </div>
+
+                <div class="bg-coco-bg rounded-3xl p-8 border-2 border-coco-light/80 shadow-xl hover:-translate-y-4 transition-transform duration-300 reveal delay-200 group">
+                    <div class="h-32 flex items-center justify-center mb-6 relative">
+                        <svg viewBox="0 0 100 100" class="w-24 h-24 absolute group-hover:scale-125 transition-transform duration-500 drop-shadow-md"><use href="#svg-coco-entero"></use></svg>
+                    </div>
+                    <h3 class="font-display text-3xl text-gray-800 mb-3 text-center">Llegada a América</h3>
+                    <p class="text-gray-600 text-center font-semibold">Fueron los españoles y portugueses en el siglo XVI quienes introdujeron el coco en el Caribe y las costas de Brasil y México, donde las palmeras encontraron un paraíso perfecto.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECCIÓN: Variedades de Coco -->
+    <section id="variedades" class="py-24 px-4 sm:px-6 lg:px-8 bg-coco-bg relative z-10 border-y-4 border-dashed border-coco-light">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16 reveal">
+                <span class="text-coco-leaf font-bold tracking-widest uppercase text-sm">Diversidad de Palmeras</span>
+                <h2 class="text-5xl font-display text-gray-800 mt-2">Variedades <span class="text-coco-dark">Populares</span></h2>
+                <p class="text-gray-600 font-semibold mt-4 max-w-2xl mx-auto">A diferencia de otras frutas, los cocos se clasifican por el tipo de palmera que los produce: Altos, Enanos e Híbridos.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Variedad 1: Alto del Pacífico -->
+                <div class="bg-white rounded-[2rem] overflow-hidden shadow-lg border-2 border-coco/20 reveal hover:shadow-2xl transition-shadow group">
+                    <div class="h-48 bg-coco-dark flex items-center justify-center p-6 relative overflow-hidden">
+                        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+                        <svg viewBox="0 0 100 100" class="w-32 h-32 drop-shadow-2xl z-10 transform group-hover:scale-110 transition-transform duration-500"><use href="#svg-coco-entero"></use></svg>
+                    </div>
+                    <div class="p-8 text-center">
+                        <h3 class="font-display text-3xl text-gray-800 mb-2">Alto del Pacífico</h3>
+                        <p class="text-sm font-bold text-coco uppercase mb-4 tracking-wider">El Gigante de Aceite</p>
+                        <p class="text-gray-600 text-sm leading-relaxed mb-4">Estas palmeras pueden alcanzar los 30 metros. Producen cocos grandes con una cáscara muy gruesa. Tardan unos 5-6 años en dar fruto y son ideales para extraer <strong>aceite y copra</strong> (pulpa seca).</p>
+                        <div class="flex justify-center gap-2">
+                            <span class="bg-yellow-100 text-yellow-800 text-xs px-3 py-1 rounded-full font-bold">Aceite</span>
+                            <span class="bg-yellow-100 text-yellow-800 text-xs px-3 py-1 rounded-full font-bold">Muy Alto</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Variedad 2: Enano Verde -->
+                <div class="bg-white rounded-[2rem] overflow-hidden shadow-lg border-2 border-coco/20 reveal delay-100 hover:shadow-2xl transition-shadow group">
+                    <div class="h-48 bg-coco-leaf flex items-center justify-center p-6 relative overflow-hidden">
+                        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+                        <svg viewBox="0 0 100 100" class="w-36 h-36 drop-shadow-2xl z-10 transform group-hover:scale-110 transition-transform duration-500"><use href="#svg-coco-cortado"></use></svg>
+                    </div>
+                    <div class="p-8 text-center">
+                        <h3 class="font-display text-3xl text-gray-800 mb-2">Enano Verde de Brasil</h3>
+                        <p class="text-sm font-bold text-coco-leaf uppercase mb-4 tracking-wider">El Rey del Agua</p>
+                        <p class="text-gray-600 text-sm leading-relaxed mb-4">Su tronco es pequeño y grueso, facilitando la cosecha. Empiezan a producir cocos en apenas 3 años. Tienen menos pulpa pero contienen un <strong>agua extremadamente dulce y abundante</strong>.</p>
+                        <div class="flex justify-center gap-2">
+                            <span class="bg-green-100 text-green-800 text-xs px-3 py-1 rounded-full font-bold">Agua Dulce</span>
+                            <span class="bg-green-100 text-green-800 text-xs px-3 py-1 rounded-full font-bold">Palma Baja</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Variedad 3: Híbrido Maypan -->
+                <div class="bg-white rounded-[2rem] overflow-hidden shadow-lg border-2 border-coco/20 reveal delay-200 hover:shadow-2xl transition-shadow group">
+                    <div class="h-48 bg-coco flex items-center justify-center p-6 relative overflow-hidden">
+                        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+                        <svg viewBox="0 0 100 100" class="w-32 h-32 drop-shadow-2xl z-10 transform group-hover:scale-110 transition-transform duration-500"><use href="#svg-coco-entero"></use></svg>
+                    </div>
+                    <div class="p-8 text-center">
+                        <h3 class="font-display text-3xl text-gray-800 mb-2">Híbrido Maypan</h3>
+                        <p class="text-sm font-bold text-coco-dark uppercase mb-4 tracking-wider">El Fuerte y Resistente</p>
+                        <p class="text-gray-600 text-sm leading-relaxed mb-4">Creado cruzando palmas Altas y Enanas. Junta lo mejor de ambos mundos: buena producción de carne y agua, y lo más importante, es altamente <strong>resistente a enfermedades mortales</strong> como el Amarillamiento Letal.</p>
+                        <div class="flex justify-center gap-2">
+                            <span class="bg-orange-100 text-orange-800 text-xs px-3 py-1 rounded-full font-bold">Resistente</span>
+                            <span class="bg-orange-100 text-orange-800 text-xs px-3 py-1 rounded-full font-bold">Gran Tamaño</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección de Cultivo: Tarjetas Ilustradas -->
+    <section id="procedimientos" class="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white to-coco-bg relative z-10">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row gap-12 items-center mb-16 reveal">
+                <div class="md:w-1/2">
+                    <h2 class="text-5xl font-display text-gray-800 tracking-wide mb-6">Plantando <span class="text-coco-leaf">Palmeras</span></h2>
+                    <p class="text-xl text-gray-600 font-semibold leading-relaxed">
+                        El cocotero es fuerte, amante del mar y de la arena. A diferencia de otras frutas, ¡su semilla es el coco gigante entero! Estos son sus pilares.
+                    </p>
+                </div>
+                <div class="md:w-1/2 flex justify-center">
+                     <svg viewBox="0 0 100 100" class="w-48 h-48 animate-float drop-shadow-2xl"><use href="#svg-coco-entero"></use></svg>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-white rounded-full p-4 flex items-center shadow-lg border-2 border-coco/20 reveal hover:scale-[1.02] transition-transform cursor-pointer group">
+                    <div class="w-24 h-24 rounded-full bg-coco flex items-center justify-center flex-shrink-0 group-hover:bg-coco-dark transition-colors">
+                        <i class="fa-solid fa-sun text-4xl text-white"></i>
+                    </div>
+                    <div class="ml-6 pr-6">
+                        <h3 class="font-display text-2xl text-coco-dark mb-1">1. Sol, Arena y Sal</h3>
+                        <p class="text-gray-600 font-semibold">Requiere mucha luz solar directa, temperaturas sobre los 27°C y suelos sueltos (arenosos). A diferencia de otros árboles, el cocotero tolera increíbles cantidades de salinidad marina.</p>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-full p-4 flex items-center shadow-lg border-2 border-coco/20 reveal delay-100 hover:scale-[1.02] transition-transform cursor-pointer group ml-0 md:ml-12">
+                    <div class="w-24 h-24 rounded-full bg-coco-leafLight flex items-center justify-center flex-shrink-0 group-hover:bg-coco-leaf transition-colors">
+                        <i class="fa-solid fa-seedling text-4xl text-white"></i>
+                    </div>
+                    <div class="ml-6 pr-6">
+                        <h3 class="font-display text-2xl text-coco-leaf mb-1">2. Germinación del "Hueso"</h3>
+                        <p class="text-gray-600 font-semibold text-sm leading-relaxed">La reproducción es sexual. Se toma un coco seco (con todo y cáscara fibrosa) y se entierra hasta la mitad de forma horizontal. A los pocos meses, una hermosa hoja verde brotará directo de uno de los "ojos" del coco.</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-full p-4 flex items-center shadow-lg border-2 border-coco/20 reveal delay-200 hover:scale-[1.02] transition-transform cursor-pointer group ml-0 md:ml-24">
+                    <div class="w-24 h-24 rounded-full bg-coco-dark flex items-center justify-center flex-shrink-0 group-hover:bg-coco transition-colors">
+                        <i class="fa-solid fa-tree text-4xl text-white"></i>
+                    </div>
+                    <div class="ml-6 pr-6">
+                        <h3 class="font-display text-2xl text-coco-dark mb-1">3. Crecimiento Longevo</h3>
+                        <p class="text-gray-600 font-semibold">Las variedades altas necesitan paciencia, ya que florecerán entre los 5 y 6 años de edad. Sin embargo, un cocotero sano puede seguir dándote cocos mes a mes ¡hasta por 80 años!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECCIÓN: Beneficios Nutricionales -->
+    <section id="nutricion" class="py-24 px-4 sm:px-6 lg:px-8 bg-coco-leaf text-white relative overflow-hidden z-10">
+        <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/leaves.png')]"></div>
+        <div class="max-w-7xl mx-auto relative z-20">
+            <div class="text-center mb-16 reveal">
+                <h2 class="text-5xl font-display text-coco-light mb-4 tracking-wide">El Poder <span class="text-white">Integral</span></h2>
+                <p class="text-xl font-semibold max-w-2xl mx-auto text-gray-200">Del coco se aprovecha absolutamente todo. Es una de las frutas más completas y nutritivas que la naturaleza nos ha regalado.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Beneficio 1 -->
+                <div class="bg-white/10 backdrop-blur-md rounded-3xl p-6 text-center border border-white/20 hover:bg-white/20 transition-colors reveal">
+                    <div class="w-16 h-16 bg-coco-light rounded-full flex items-center justify-center mx-auto mb-4 text-coco-dark text-2xl shadow-lg">
+                        <i class="fa-solid fa-glass-water"></i>
+                    </div>
+                    <h4 class="font-display text-2xl mb-2">Electrolitos</h4>
+                    <p class="text-sm text-gray-200">El agua de coco (fruto verde) es una bebida isotónica natural rica en potasio y magnesio, ideal para la rehidratación profunda.</p>
+                </div>
+                <!-- Beneficio 2 -->
+                <div class="bg-white/10 backdrop-blur-md rounded-3xl p-6 text-center border border-white/20 hover:bg-white/20 transition-colors reveal delay-100">
+                    <div class="w-16 h-16 bg-coco-light rounded-full flex items-center justify-center mx-auto mb-4 text-coco-dark text-2xl shadow-lg">
+                        <i class="fa-solid fa-fire-burner"></i>
+                    </div>
+                    <h4 class="font-display text-2xl mb-2">Grasas Saludables</h4>
+                    <p class="text-sm text-gray-200">La pulpa madura aporta ácidos grasos de cadena media (MCTs), los cuales el cuerpo convierte rápidamente en energía limpia.</p>
+                </div>
+                <!-- Beneficio 3 -->
+                <div class="bg-white/10 backdrop-blur-md rounded-3xl p-6 text-center border border-white/20 hover:bg-white/20 transition-colors reveal delay-200">
+                    <div class="w-16 h-16 bg-coco-light rounded-full flex items-center justify-center mx-auto mb-4 text-coco-dark text-2xl shadow-lg">
+                        <i class="fa-solid fa-shield-virus"></i>
+                    </div>
+                    <h4 class="font-display text-2xl mb-2">Ácido Láurico</h4>
+                    <p class="text-sm text-gray-200">El aceite de coco es mundialmente conocido por contener este ácido, que actúa como un poderoso antiviral y antibacteriano.</p>
+                </div>
+                <!-- Beneficio 4 -->
+                <div class="bg-white/10 backdrop-blur-md rounded-3xl p-6 text-center border border-white/20 hover:bg-white/20 transition-colors reveal delay-300">
+                    <div class="w-16 h-16 bg-coco-light rounded-full flex items-center justify-center mx-auto mb-4 text-coco-dark text-2xl shadow-lg">
+                        <i class="fa-solid fa-leaf"></i>
+                    </div>
+                    <h4 class="font-display text-2xl mb-2">Fibra Dietética</h4>
+                    <p class="text-sm text-gray-200">Consumir la "carne" blanca del coco aporta muchísima fibra, estabilizando los niveles de azúcar en la sangre y la digestión.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MINIJUEGO ILUSTRADO -->
+    <section id="juego" class="py-24 px-4 sm:px-6 lg:px-8 bg-coco text-white relative z-20">
+        <div class="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCI+CiAgPGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjIiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMSkiLz4KPC9zdmc+')]"></div>
+        
+        <div class="max-w-4xl mx-auto relative z-10 bg-white/10 backdrop-blur-md p-8 md:p-12 rounded-[3rem] border-4 border-white/30 shadow-2xl">
+            <div class="text-center mb-10 reveal">
+                <h2 class="text-5xl md:text-6xl font-display font-bold mb-4 drop-shadow-lg text-white tracking-widest">
+                    ¡Fiebre <span class="text-coco-light">Cocotera</span>!
+                </h2>
+                <p class="text-2xl font-semibold mb-8">
+                    Atrapa los <strong class="text-coco-light">Cocos Frescos</strong> <svg viewBox="0 0 100 100" class="w-8 h-8 inline"><use href="#svg-coco-cortado"></use></svg><br>
+                    ¡Esquiva los <strong class="text-red-900 bg-red-100 px-2 py-0.5 rounded">Cocos Pasados</strong>! <svg viewBox="0 0 100 100" class="w-8 h-8 inline"><use href="#svg-coco-malo"></use></svg>
+                </p>
+                
+                <div class="flex justify-center gap-8 mb-8">
+                    <div class="bg-white text-coco-dark px-8 py-4 rounded-3xl shadow-inner text-center border-b-4 border-coco-light">
+                        <span class="block text-sm uppercase font-bold text-gray-400">Tiempo</span>
+                        <span id="timerDisplay" class="text-4xl font-display">20s</span>
+                    </div>
+                    <div class="bg-white text-coco-leaf px-8 py-4 rounded-3xl shadow-inner text-center border-b-4 border-coco">
+                        <span class="block text-sm uppercase font-bold text-gray-400">Puntos</span>
+                        <span id="scoreDisplay" class="text-4xl font-display">0</span>
+                    </div>
+                </div>
+                
+                <button id="startBtn" onclick="startGame()" class="bg-white text-coco-dark font-display text-3xl px-12 py-4 rounded-full hover:scale-110 hover:shadow-2xl transition-all shadow-lg animate-pulse">
+                    ¡A Cosechar!
+                </button>
+            </div>
+
+            <!-- Área del Minijuego -->
+            <div id="game-area" class="w-full h-[450px] mx-auto border-8 border-white/50 hidden">
+                <div class="tree-canopy"></div>
+                <!-- Cocos generados por JS -->
+                
+                <div id="game-overlay" class="absolute inset-0 bg-coco-leaf/90 flex flex-col items-center justify-center hidden z-30 backdrop-blur-sm">
+                    <svg viewBox="0 0 100 100" class="w-32 h-32 mb-4 drop-shadow-2xl animate-wiggle"><use href="#svg-coco-cortado"></use></svg>
+                    <h3 class="text-6xl font-display text-white mb-2 tracking-wide">¡Costal Lleno!</h3>
+                    <p class="text-3xl text-coco-light mb-8 font-bold">Puntuación: <span id="finalScore" class="text-white">0</span></p>
+                    <button onclick="startGame()" class="bg-white text-coco-dark font-display text-2xl px-10 py-3 rounded-full hover:bg-coco-light hover:text-coco-dark transition-colors shadow-xl">Jugar de Nuevo</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Cosecha y Postcosecha Visual -->
+    <section id="cuidados" class="py-24 px-4 sm:px-6 lg:px-8 bg-white z-10 relative">
+        <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-16 items-center">
+            
+            <div class="reveal relative">
+                <div class="absolute -top-10 -left-10 w-40 h-40 bg-coco-light/60 rounded-full blur-2xl"></div>
+                <!-- Ilustración Gigante para mantener estética perfecta -->
+                <div class="relative z-10 h-[450px] w-full flex items-center justify-center">
+                    <svg viewBox="0 0 100 100" class="w-80 h-80 drop-shadow-2xl z-10 transform hover:scale-110 transition-transform duration-500"><use href="#svg-coco-cortado"></use></svg>
+                    <svg viewBox="0 0 100 100" class="absolute -bottom-12 -left-4 w-56 h-56 drop-shadow-xl z-0 opacity-70 transform -rotate-12"><use href="#svg-coco-entero"></use></svg>
+                </div>
+                
+                <!-- Tarjeta Flotante -->
+                <div class="absolute -bottom-8 -right-8 bg-white p-6 rounded-3xl shadow-xl z-20 flex items-center gap-4 animate-float border-2 border-coco/10">
+                    <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                        <i class="fa-solid fa-helmet-safety text-red-500 text-2xl"></i>
+                    </div>
+                    <div>
+                        <p class="font-display text-xl text-gray-800">Cuidado Abajo</p>
+                        <p class="text-sm text-gray-500 font-bold">Peligro por caída de cocos pesados.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="reveal delay-200">
+                <h2 class="text-5xl font-display text-gray-800 mb-8 leading-tight">Las Reglas de Oro en la <span class="text-coco-dark">Cosecha</span></h2>
+                
+                <div class="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-0 md:before:translate-x-0 before:h-full before:w-1 before:bg-gradient-to-b before:from-coco-light before:to-coco-dark">
+                    
+                    <div class="relative flex items-start group">
+                        <div class="flex items-center justify-center w-10 h-10 rounded-full bg-coco-light text-coco-dark font-bold shadow shrink-0 z-10 border-4 border-white">
+                            <i class="fa-solid fa-droplet"></i>
+                        </div>
+                        <div class="ml-6 mt-1">
+                            <h4 class="font-display text-2xl text-gray-800">Cosecha Verde (Agua)</h4>
+                            <p class="text-gray-600 font-semibold mt-1">Si el objetivo es beber su deliciosa y dulce agua, el coco se cosecha inmaduro (entre 7 y 9 meses). En este punto es de color verde y su carne interior es gelatinosa y transparente.</p>
+                        </div>
+                    </div>
+
+                    <div class="relative flex items-start group">
+                        <div class="flex items-center justify-center w-10 h-10 rounded-full bg-coco text-white font-bold shadow shrink-0 z-10 border-4 border-white">
+                            <i class="fa-solid fa-layer-group"></i>
+                        </div>
+                        <div class="ml-6 mt-1">
+                            <h4 class="font-display text-2xl text-gray-800">Cosecha Seca (Copra)</h4>
+                            <p class="text-gray-600 font-semibold mt-1">Si buscas extraer la pulpa blanca gruesa (copra) o hacer aceite, debes esperar a los 11-12 meses. Su cáscara exterior se volverá café, la carne será dura y pesada, perdiendo gran parte de su agua.</p>
+                        </div>
+                    </div>
+
+                    <div class="relative flex items-start group">
+                        <div class="flex items-center justify-center w-10 h-10 rounded-full bg-coco-dark text-white font-bold shadow shrink-0 z-10 border-4 border-white">
+                            <i class="fa-solid fa-person-arrow-up-from-line"></i>
+                        </div>
+                        <div class="ml-6 mt-1">
+                            <h4 class="font-display text-2xl text-gray-800">El Riesgo del Recolector</h4>
+                            <p class="text-gray-600 font-semibold mt-1">Es un trabajo peligroso. Para palmas muy altas, se utilizan garrochas de bambú de hasta 20 metros con navajas en la punta. Al cortar los racimos, es vital asegurar el perímetro, ya que un coco que cae a gran altura es extremadamente letal.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer con los Datos Escolares -->
+    <footer class="bg-coco-leaf text-white pt-16 pb-8 relative overflow-hidden z-10">
+        <div class="absolute bottom-0 right-0 opacity-10 transform translate-x-1/4 translate-y-1/4 pointer-events-none">
+            <svg viewBox="0 0 100 100" class="w-96 h-96"><use href="#svg-coco-entero"></use></svg>
+        </div>
+        
+        <div class="max-w-7xl mx-auto px-4 flex flex-col items-center text-center relative z-10">
+            <div class="w-20 h-20 mb-6 bg-white rounded-full flex items-center justify-center animate-wiggle shadow-xl">
+                <svg viewBox="0 0 100 100" class="w-12 h-12 drop-shadow-md"><use href="#svg-coco-cortado"></use></svg>
+            </div>
+            <span class="font-display text-4xl mb-4">MundoCoco</span>
+            <p class="text-coco-light font-bold text-lg max-w-md mx-auto mb-8">El portal interactivo dedicado a la palmera más increíble de nuestro planeta.</p>
+            
+            <!-- TARJETA DE DATOS ACADÉMICOS -->
+            <div class="mt-4 mb-6 bg-white/10 p-8 rounded-[2rem] backdrop-blur-md border border-white/20 w-full max-w-4xl mx-auto shadow-2xl flex flex-col md:flex-row justify-between text-left gap-8 transform hover:scale-[1.02] transition-transform duration-300 relative overflow-hidden">
+                
+                <!-- Adorno de la tarjeta -->
+                <div class="absolute -right-10 -top-10 opacity-20 pointer-events-none">
+                    <i class="fa-solid fa-graduation-cap text-9xl text-coco-light"></i>
+                </div>
+
+                <div class="flex items-start gap-5 relative z-10">
+                    <div class="w-16 h-16 bg-coco rounded-full flex items-center justify-center flex-shrink-0 shadow-lg border-2 border-white/30">
+                        <i class="fa-solid fa-user-graduate text-white text-3xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-coco-light font-display text-2xl mb-1 tracking-wide">Datos del Alumno</h4>
+                        <!-- NOMBRE DEL ALUMNO -->
+                        <p class="font-bold text-2xl text-white">Samuel Concepción Rasgado</p>
+                        <div class="flex items-center gap-2 mt-2">
+                            <span class="bg-white/20 px-4 py-1 rounded-full text-sm font-bold text-white shadow-sm border border-white/10">Grupo: 6D</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="hidden md:block w-px bg-white/20 self-stretch relative z-10"></div>
+                
+                <div class="flex items-start gap-5 relative z-10">
+                    <div class="w-16 h-16 bg-coco-dark rounded-full flex items-center justify-center flex-shrink-0 shadow-lg border-2 border-white/30">
+                        <i class="fa-solid fa-chalkboard-user text-white text-2xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-coco-light font-display text-2xl mb-1 tracking-wide">Datos Académicos</h4>
+                        <!-- DOCENTE Y MATERIA -->
+                        <p class="font-bold text-xl text-white">Docente: Martha Paxtian Diaz</p>
+                        <div class="flex items-center gap-2 mt-2">
+                            <span class="bg-white/20 px-4 py-1 rounded-full text-sm font-bold text-white shadow-sm border border-white/10">Materia: EPHE</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- BOTÓN DE DESCARGA FINAL -->
+            <div class="mb-10 w-full max-w-4xl mx-auto flex justify-center">
+                <button onclick="downloadHTML()" class="bg-coco-dark hover:bg-coco text-white px-8 py-3 rounded-full font-bold text-xl transition-all shadow-xl flex items-center gap-3 transform hover:scale-105 border-4 border-white/20">
+                    <i class="fa-solid fa-file-arrow-down text-2xl"></i> Descargar Proyecto (HTML)
+                </button>
+            </div>
+            
+            <div class="border-t border-white/20 w-full pt-8 text-white/50 text-sm font-bold flex flex-col md:flex-row justify-between items-center gap-4 px-6">
+                <span>&copy; 2026 Mundo Coco. Proyecto Escolar.</span>
+                <span>Desarrollado con <i class="fa-solid fa-heart text-coco-light"></i> para la materia de EPHE</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- SCRIPTS -->
+    <script>
+        // --- FUNCIÓN PARA DESCARGAR EL HTML ---
+        function downloadHTML() {
+            // Obtenemos todo el contenido de la etiqueta <html>
+            const htmlContent = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+            
+            // Creamos un Blob con el contenido de texto
+            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            
+            // Creamos una etiqueta <a> invisible para forzar la descarga
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'Proyecto_Mundo_Coco_Samuel.html'; // Nombre del archivo actualizado
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        // 1. Navbar Scroll Effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('shadow-md', 'py-0');
+                navbar.classList.remove('h-24');
+                navbar.classList.add('h-16');
+            } else {
+                navbar.classList.remove('shadow-md', 'py-0', 'h-16');
+                navbar.classList.add('h-24');
+            }
+        });
+
+        // 2. Efecto Reveal on Scroll
+        function reveal() {
+            var reveals = document.querySelectorAll(".reveal");
+            for (var i = 0; i < reveals.length; i++) {
+                var windowHeight = window.innerHeight;
+                var elementTop = reveals[i].getBoundingClientRect().top;
+                if (elementTop < windowHeight - 100) {
+                    reveals[i].classList.add("active");
+                }
+            }
+        }
+        window.addEventListener("scroll", reveal);
+        reveal();
+
+        // 3. Generador de Lluvia de Cocos (Background)
+        function createFallingItems() {
+            const container = document.getElementById('falling-items-container');
+            const numItems = 12; 
+
+            for (let i = 0; i < numItems; i++) {
+                const item = document.createElement('div');
+                item.className = 'falling-item';
+                
+                // Mezcla de cocos enteros y cortados
+                const isCut = Math.random() > 0.6;
+                const size = Math.random() * 50 + 40; 
+                
+                item.innerHTML = `<svg viewBox="0 0 100 100" style="width:${size}px; height:${size}px;" class="drop-shadow-lg"><use href="#svg-coco-${isCut ? 'cortada' : 'entero'}"></use></svg>`;
+                
+                item.style.left = `${Math.random() * 90}vw`;
+                item.style.animationDuration = `${Math.random() * 15 + 10}s`;
+                item.style.animationDelay = `-${Math.random() * 20}s`;
+                
+                container.appendChild(item);
+            }
+        }
+        createFallingItems();
+
+        // 4. Lógica del Minijuego "Fiebre Cocotera"
+        let score = 0;
+        let timeLeft = 20;
+        let gameInterval;
+        let spawnInterval;
+        const gameArea = document.getElementById('game-area');
+        const startBtn = document.getElementById('startBtn');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const overlay = document.getElementById('game-overlay');
+        const finalScore = document.getElementById('finalScore');
+
+        function startGame() {
+            score = 0;
+            timeLeft = 20;
+            scoreDisplay.innerText = score;
+            timerDisplay.innerText = timeLeft + "s";
+            
+            startBtn.classList.add('hidden');
+            gameArea.classList.remove('hidden');
+            overlay.classList.add('hidden');
+            
+            document.querySelectorAll('.game-item').forEach(m => m.remove());
+
+            gameInterval = setInterval(updateTimer, 1000);
+            spawnInterval = setInterval(spawnItem, 550); // Velocidad ajustada
+        }
+
+        function updateTimer() {
+            timeLeft--;
+            timerDisplay.innerText = timeLeft + "s";
+            
+            if (timeLeft <= 0) {
+                endGame();
+            }
+        }
+
+        function endGame() {
+            clearInterval(gameInterval);
+            clearInterval(spawnInterval);
+            document.querySelectorAll('.game-item').forEach(m => m.remove());
+            finalScore.innerText = score;
+            overlay.classList.remove('hidden');
+        }
+
+        function spawnItem() {
+            const item = document.createElement('div');
+            item.className = 'game-item';
+            
+            // 35% de probabilidad de que sea un coco malo/pasado
+            const isBad = Math.random() < 0.35;
+            // Si es bueno, hay 50% probabilidad que caiga entero o cortado
+            const type = isBad ? 'malo' : (Math.random() > 0.5 ? 'entero' : 'cortado');
+            
+            item.innerHTML = `<svg viewBox="0 0 100 100" class="w-full h-full pointer-events-none"><use href="#svg-coco-${type}"></use></svg>`;
+
+            const maxX = gameArea.clientWidth - 80;
+            const maxY = gameArea.clientHeight - 100;
+            const randomX = Math.floor(Math.random() * maxX) + 10;
+            const randomY = Math.floor(Math.random() * maxY) + 40; 
+
+            item.style.left = randomX + 'px';
+            item.style.top = randomY + 'px';
+
+            item.onmousedown = function(e) {
+                if(isBad) {
+                    score -= 5;
+                    showFloatingText("-5", e.clientX, e.clientY, "text-red-500");
+                    gameArea.classList.add('bg-red-300');
+                    setTimeout(() => gameArea.classList.remove('bg-red-300'), 150);
+                } else {
+                    score += 10;
+                    showFloatingText("+10", e.clientX, e.clientY, "text-coco-dark");
+                }
+                scoreDisplay.innerText = score;
+                
+                item.classList.add('splat-effect');
+                setTimeout(() => item.remove(), 400);
+            };
+
+            gameArea.appendChild(item);
+
+            // Desaparecer automáticamente si no se hace clic
+            setTimeout(() => {
+                if(item.parentNode && !item.classList.contains('splat-effect')) {
+                    item.style.opacity = '0';
+                    item.style.transform = 'scale(0) translateY(50px)';
+                    setTimeout(() => { if(item.parentNode) item.remove(); }, 300);
+                }
+            }, 1200 + Math.random() * 1000);
+        }
+
+        function showFloatingText(text, x, y, colorClass) {
+            const floatText = document.createElement('div');
+            floatText.innerText = text;
+            floatText.className = `floating-score ${colorClass}`;
+            
+            const rect = gameArea.getBoundingClientRect();
+            floatText.style.left = (x - rect.left - 20) + 'px';
+            floatText.style.top = (y - rect.top - 20) + 'px';
+
+            gameArea.appendChild(floatText);
+            setTimeout(() => floatText.remove(), 1000);
+        }
+    </script>
+</body>
+</html>
