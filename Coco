@@ -653,23 +653,29 @@
             <span class="font-display text-4xl mb-4">MundoCoco</span>
             <p class="text-coco-light font-bold text-lg max-w-md mx-auto mb-8">El portal interactivo dedicado a la palmera más increíble de nuestro planeta.</p>
             
-            <!-- TARJETA DE DATOS ACADÉMICOS -->
-            <div class="mt-4 mb-6 bg-white/10 p-8 rounded-[2rem] backdrop-blur-md border border-white/20 w-full max-w-4xl mx-auto shadow-2xl flex flex-col md:flex-row justify-between text-left gap-8 transform hover:scale-[1.02] transition-transform duration-300 relative overflow-hidden">
+            <!-- TARJETA DE DATOS ACADÉMICOS ACTUALIZADA CON EQUIPO -->
+            <div class="mt-4 mb-8 bg-white/10 p-8 rounded-[2rem] backdrop-blur-md border border-white/20 w-full max-w-5xl mx-auto shadow-2xl flex flex-col md:flex-row justify-between text-left gap-8 transform hover:scale-[1.02] transition-transform duration-300 relative overflow-hidden">
                 
-                <!-- Adorno de la tarjeta -->
                 <div class="absolute -right-10 -top-10 opacity-20 pointer-events-none">
-                    <i class="fa-solid fa-graduation-cap text-9xl text-coco-light"></i>
+                    <i class="fa-solid fa-users text-9xl text-main-light"></i>
                 </div>
 
-                <div class="flex items-start gap-5 relative z-10">
-                    <div class="w-16 h-16 bg-coco rounded-full flex items-center justify-center flex-shrink-0 shadow-lg border-2 border-white/30">
+                <!-- Lista de Integrantes -->
+                <div class="flex items-start gap-5 relative z-10 flex-1">
+                    <div class="w-16 h-16 bg-main rounded-full flex items-center justify-center flex-shrink-0 shadow-lg border-2 border-white/30">
                         <i class="fa-solid fa-user-graduate text-white text-3xl"></i>
                     </div>
                     <div>
-                        <h4 class="text-coco-light font-display text-2xl mb-1 tracking-wide">Datos del Alumno</h4>
-                        <!-- NOMBRE DEL ALUMNO -->
-                        <p class="font-bold text-2xl text-white">Samuel Concepción Rasgado</p>
-                        <div class="flex items-center gap-2 mt-2">
+                        <h4 class="text-main-light font-display text-2xl mb-3 tracking-wide">Integrantes del Equipo</h4>
+                        <ul class="font-bold text-lg text-white space-y-1 mb-4">
+                            <li><i class="fa-solid fa-check text-main-accent text-sm mr-2"></i> Samuel Concepción Rasgado</li>
+                            <li><i class="fa-solid fa-check text-main-accent text-sm mr-2"></i> Jesús Andrés Ramón Martínez</li>
+                            <li><i class="fa-solid fa-check text-main-accent text-sm mr-2"></i> Luis Fernando Luna Alor</li>
+                            <li><i class="fa-solid fa-check text-main-accent text-sm mr-2"></i> Eder Abdeel Sanchéz Vasquéz</li>
+                            <li><i class="fa-solid fa-check text-main-accent text-sm mr-2"></i> Cristobál Marquez Gorgonio</li>
+                            <li><i class="fa-solid fa-check text-main-accent text-sm mr-2"></i> Kevin Alberto Torres Santos</li>
+                        </ul>
+                        <div class="flex items-center gap-2">
                             <span class="bg-white/20 px-4 py-1 rounded-full text-sm font-bold text-white shadow-sm border border-white/10">Grupo: 6D</span>
                         </div>
                     </div>
@@ -677,27 +683,19 @@
                 
                 <div class="hidden md:block w-px bg-white/20 self-stretch relative z-10"></div>
                 
-                <div class="flex items-start gap-5 relative z-10">
-                    <div class="w-16 h-16 bg-coco-dark rounded-full flex items-center justify-center flex-shrink-0 shadow-lg border-2 border-white/30">
+                <!-- Docente -->
+                <div class="flex items-start gap-5 relative z-10 md:w-1/3">
+                    <div class="w-16 h-16 bg-main-accent rounded-full flex items-center justify-center flex-shrink-0 shadow-lg border-2 border-white/30">
                         <i class="fa-solid fa-chalkboard-user text-white text-2xl"></i>
                     </div>
                     <div>
-                        <h4 class="text-coco-light font-display text-2xl mb-1 tracking-wide">Datos Académicos</h4>
-                        <!-- DOCENTE Y MATERIA -->
+                        <h4 class="text-main-light font-display text-2xl mb-1 tracking-wide">Datos Académicos</h4>
                         <p class="font-bold text-xl text-white">Docente: Martha Paxtian Diaz</p>
                         <div class="flex items-center gap-2 mt-2">
                             <span class="bg-white/20 px-4 py-1 rounded-full text-sm font-bold text-white shadow-sm border border-white/10">Materia: EPHE</span>
                         </div>
                     </div>
                 </div>
-
-            </div>
-
-            <!-- BOTÓN DE DESCARGA FINAL -->
-            <div class="mb-10 w-full max-w-4xl mx-auto flex justify-center">
-                <button onclick="downloadHTML()" class="bg-coco-dark hover:bg-coco text-white px-8 py-3 rounded-full font-bold text-xl transition-all shadow-xl flex items-center gap-3 transform hover:scale-105 border-4 border-white/20">
-                    <i class="fa-solid fa-file-arrow-down text-2xl"></i> Descargar Proyecto (HTML)
-                </button>
             </div>
             
             <div class="border-t border-white/20 w-full pt-8 text-white/50 text-sm font-bold flex flex-col md:flex-row justify-between items-center gap-4 px-6">
