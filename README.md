@@ -1,1 +1,411 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mundo Frutal | Proyecto EPHE</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Chewy&family=Nunito:wght@400;600;800;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        main: {
+                            light: '#E6F4EA',
+                            DEFAULT: '#2D6A4F',
+                            dark: '#1B4332',
+                            accent: '#FF9F1C',
+                            bg: '#F8FAF8'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Nunito', 'sans-serif'],
+                        display: ['Chewy', 'cursive'],
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'wiggle': 'wiggle 2s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0) rotate(0deg)' },
+                            '50%': { transform: 'translateY(-15px) rotate(3deg)' },
+                        },
+                        wiggle: {
+                            '0%, 100%': { transform: 'rotate(-3deg)' },
+                            '50%': { transform: 'rotate(3deg)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
 
+    <style>
+        body {
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="%232D6A4F"><path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4Z"/></svg>') 12 12, auto;
+        }
+        a, button, .cursor-pointer {
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="%23FF9F1C"><path d="M12,2L15,9L22,12L15,15L12,22L9,15L2,12L9,9L12,2Z"/></svg>') 12 12, pointer !important;
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px) scale(0.95);
+            transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+        .delay-100 { transition-delay: 100ms; }
+        .delay-200 { transition-delay: 200ms; }
+        .delay-300 { transition-delay: 300ms; }
+        .delay-400 { transition-delay: 400ms; }
+
+        .text-gradient {
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-image: linear-gradient(to right, #2D6A4F, #52B788, #FF9F1C);
+        }
+
+        .blob-shape {
+            border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+            animation: blob-morph 8s ease-in-out infinite;
+        }
+        @keyframes blob-morph {
+            0%, 100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+            34% { border-radius: 70% 30% 50% 50% / 30% 30% 70% 70%; }
+            67% { border-radius: 100% 60% 60% 100% / 100% 100% 60% 60%; }
+        }
+    </style>
+</head>
+<body class="bg-main-bg text-gray-800 antialiased overflow-x-hidden selection:bg-main-accent selection:text-white">
+
+    <!-- DICCIONARIO DE ILUSTRACIONES SVG DE TODAS LAS FRUTAS -->
+    <svg style="display: none;">
+        <defs>
+            <!-- Mango -->
+            <g id="svg-mango">
+                <path d="M44.5,15.5 C28,3.5 10,17.5 5,35.5 C0,53.5 5,73.5 22,83.5 C39,93.5 65,85.5 75,65.5 C85,45.5 61,26.5 44.5,15.5 Z" fill="#E85D04"/>
+                <path d="M42.5,13.5 C26,1.5 8,15.5 3,33.5 C-2,51.5 3,71.5 20,81.5 C37,91.5 63,83.5 73,63.5 C83,43.5 59,24.5 42.5,13.5 Z" fill="#FF9F1C"/>
+                <path d="M15,45 C12,35 20,25 30,20 C25,28 20,38 22,48 C18,48 16,47 15,45 Z" fill="#FFD166"/>
+                <path d="M48,20 C55,5 80,5 80,5 C80,5 80,25 65,35 C55,40 48,20 48,20 Z" fill="#2D6A4F"/>
+            </g>
+            <!-- Limón -->
+            <g id="svg-limon">
+                <ellipse cx="50" cy="50" rx="36" ry="42" fill="#55A630"/>
+                <ellipse cx="48" cy="48" rx="34" ry="40" fill="#8AC926"/>
+                <ellipse cx="40" cy="40" rx="15" ry="25" fill="#D4E059" opacity="0.5" transform="rotate(-25 40 40)"/>
+                <path d="M50,8 C50,15 50,15 50,15" stroke="#2B9348" stroke-width="4" stroke-linecap="round"/>
+                <path d="M50,12 C65,2 75,15 65,25 C55,30 50,12 50,12 Z" fill="#2B9348"/>
+            </g>
+            <!-- Papaya Cortada -->
+            <g id="svg-papaya">
+                <ellipse cx="50" cy="55" rx="35" ry="42" fill="#8AC926"/>
+                <ellipse cx="50" cy="55" rx="30" ry="38" fill="#E85D04"/>
+                <ellipse cx="50" cy="55" rx="26" ry="34" fill="#FF9F1C"/>
+                <ellipse cx="50" cy="55" rx="16" ry="24" fill="#FFCA3A"/>
+                <ellipse cx="50" cy="55" rx="12" ry="20" fill="#E85D04" opacity="0.3"/>
+                <circle cx="45" cy="45" r="2.5" fill="#333"/>
+                <circle cx="52" cy="48" r="2.5" fill="#333"/>
+                <circle cx="48" cy="54" r="2.5" fill="#333"/>
+                <circle cx="55" cy="58" r="2.5" fill="#333"/>
+                <circle cx="44" cy="60" r="2.5" fill="#333"/>
+                <circle cx="50" cy="65" r="2.5" fill="#333"/>
+                <circle cx="48" cy="40" r="2.5" fill="#333"/>
+                <circle cx="55" cy="42" r="2.5" fill="#333"/>
+                <circle cx="42" cy="52" r="2.5" fill="#333"/>
+            </g>
+            <!-- Coco Cortado -->
+            <g id="svg-coco">
+                <path d="M 5 50 A 45 45 0 0 0 95 50 Z" fill="#8B5A2B"/>
+                <path d="M 12 50 A 38 38 0 0 0 88 50 Z" fill="#F5F5DC"/>
+                <path d="M 25 50 A 25 25 0 0 0 75 50 Z" fill="#E0F6FF"/>
+                <path d="M 5 50 Q 25 40 50 50 T 95 50" fill="none" stroke="#F5F5DC" stroke-width="6"/>
+                <path d="M 5 50 Q 25 40 50 50 T 95 50" fill="none" stroke="#8B5A2B" stroke-width="2"/>
+                <path d="M 20 75 Q 25 85 30 80" stroke="#5C3A21" stroke-width="2" fill="none" opacity="0.5"/>
+                <path d="M 70 75 Q 75 85 80 80" stroke="#5C3A21" stroke-width="2" fill="none" opacity="0.5"/>
+            </g>
+            <!-- Melón Cortado -->
+            <g id="svg-melon">
+                <path d="M 5 50 A 45 45 0 0 0 95 50 Z" fill="#E2C792"/>
+                <path d="M 9 50 A 41 41 0 0 0 91 50 Z" fill="#A9DFBF"/>
+                <path d="M 14 50 A 36 36 0 0 0 86 50 Z" fill="#FF9F1C"/>
+                <path d="M 20 50 A 30 30 0 0 0 80 50 Z" fill="#FF8C00"/>
+                <path d="M 35 50 A 15 10 0 0 0 65 50 Z" fill="#FFD166"/>
+                <circle cx="45" cy="53" r="2" fill="#E85D04"/>
+                <circle cx="50" cy="55" r="2" fill="#E85D04"/>
+                <circle cx="55" cy="52" r="2" fill="#E85D04"/>
+                <circle cx="48" cy="57" r="2" fill="#E85D04"/>
+                <circle cx="53" cy="56" r="2" fill="#E85D04"/>
+                <circle cx="42" cy="51" r="2" fill="#E85D04"/>
+                <circle cx="58" cy="51" r="2" fill="#E85D04"/>
+                <path d="M 5 50 L 95 50" stroke="#E2C792" stroke-width="2"/>
+            </g>
+        </defs>
+    </svg>
+
+        <!-- Navegación: ACTUALIZADA PARA CONECTAR HTMLs -->
+    <nav class="fixed w-full z-50 bg-white/80 backdrop-blur-xl shadow-sm transition-all duration-300 border-b border-melon/20" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-24">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center gap-3 cursor-pointer group" onclick="window.scrollTo(0,0)">
+                    <div class="w-12 h-12 relative animate-wiggle">
+                        <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md"><use href="#svg-melon-cortado"></use></svg>
+                    </div>
+                    <span class="font-display tracking-wide text-3xl text-gray-800">Mundo<span class="text-melon-dark">Melón</span></span>
+                </div>
+                
+                <!-- Menú de Enlaces a Otros Archivos HTML -->
+                <div class="hidden lg:flex space-x-6 items-center bg-white/50 px-8 py-3 rounded-full border border-gray-100 shadow-sm text-sm font-bold">
+                    <a href="Inicio.html" class="text-gray-700 hover:text-melon-dark transition-all hover:scale-105">Inicio</a>
+                    <a href="Mango.html" class="text-gray-700 hover:text-melon-dark transition-all hover:scale-105">Mango</a>
+                    <a href="Limon.html" class="text-gray-700 hover:text-melon-dark transition-all hover:scale-105">Limón</a>
+                    <a href="Papaya.html" class="text-gray-700 hover:text-melon-dark transition-all hover:scale-105">Papaya</a>
+                    <a href="Coco.html" class="text-gray-700 hover:text-melon-dark transition-all hover:scale-105">Coco</a>
+                    <!-- Fruta Actual Highlighted -->
+                    <a href="Melon.html" class="text-melon-dark border-b-2 border-melon-dark pb-1 scale-105">Melón</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="relative min-h-screen flex items-center justify-center pt-24 overflow-hidden z-10">
+        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/food.png')] opacity-5 z-0 pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex flex-col items-center text-center relative z-20">
+            <div class="reveal">
+                <div class="inline-flex items-center gap-2 py-2 px-6 rounded-full bg-main-light text-main-dark font-bold text-sm tracking-widest uppercase mb-8 border border-main/20 shadow-sm">
+                    <i class="fa-solid fa-graduation-cap"></i> Proyecto Integrador EPHE
+                </div>
+                <h1 class="text-6xl md:text-7xl lg:text-8xl font-display text-gray-900 mb-6 leading-tight drop-shadow-sm">
+                    Explora el <br> <span class="text-gradient drop-shadow-md">Paraíso Frutal</span>
+                </h1>
+                <p class="text-xl text-gray-600 mb-12 font-semibold max-w-2xl mx-auto leading-relaxed">
+                    Un viaje interactivo a través de la historia, el cultivo, la cosecha y los beneficios nutricionales de nuestras frutas favoritas.
+                </p>
+                <div class="flex flex-wrap justify-center gap-6">
+                    <a href="#galeria" class="bg-main text-white px-10 py-4 rounded-full font-bold text-xl hover:bg-main-dark transform hover:-translate-y-2 transition-all shadow-xl hover:shadow-2xl flex items-center gap-3">
+                        Comenzar Recorrido <i class="fa-solid fa-arrow-down"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Galería de Accesos (El Menú Visual) -->
+    <section id="galeria" class="py-24 px-4 sm:px-6 lg:px-8 bg-white relative z-10">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16 reveal">
+                <h2 class="text-4xl md:text-5xl font-display text-gray-800 tracking-wide">Selecciona tu <span class="text-main-accent">Fruta</span></h2>
+                <div class="w-24 h-1 bg-main mx-auto mt-4 rounded-full"></div>
+                <p class="text-gray-500 font-semibold mt-4">Haz clic en cualquier tarjeta para abrir su investigación completa.</p>
+            </div>
+
+            <!-- Cuadrícula de Frutas Perfectamente Centrada -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-10">
+                
+                <!-- 1. MANGO -->
+                <a href="Mango.html" class="block group reveal sm:col-span-1 lg:col-span-2">
+                    <div class="bg-white rounded-[2rem] p-8 shadow-lg border-2 border-orange-100 hover:shadow-2xl hover:border-orange-400 transition-all transform hover:-translate-y-3 relative overflow-hidden h-full flex flex-col items-center text-center">
+                        <div class="absolute inset-0 bg-gradient-to-br from-orange-50 to-white opacity-50 z-0"></div>
+                        <div class="w-32 h-32 mb-6 relative z-10 group-hover:scale-110 transition-transform duration-500 animate-float">
+                            <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-xl"><use href="#svg-mango"></use></svg>
+                        </div>
+                        <h3 class="font-display text-4xl text-gray-800 mb-2 relative z-10">El Mango</h3>
+                        <p class="text-orange-600 font-bold text-sm tracking-widest uppercase mb-4 relative z-10">El Rey Tropical</p>
+                        <p class="text-gray-500 text-sm relative z-10 mb-6">Origen milenario, cultivo al sol y el cuidado contra su látex natural.</p>
+                        <span class="mt-auto inline-block bg-orange-100 text-orange-700 px-6 py-2 rounded-full font-bold group-hover:bg-orange-500 group-hover:text-white transition-colors relative z-10">
+                            Descubrir <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </span>
+                    </div>
+                </a>
+
+                <!-- 2. LIMÓN -->
+                <a href="Limon.html" class="block group reveal delay-100 sm:col-span-1 lg:col-span-2">
+                    <div class="bg-white rounded-[2rem] p-8 shadow-lg border-2 border-lime-100 hover:shadow-2xl hover:border-lime-500 transition-all transform hover:-translate-y-3 relative overflow-hidden h-full flex flex-col items-center text-center">
+                        <div class="absolute inset-0 bg-gradient-to-br from-lime-50 to-white opacity-50 z-0"></div>
+                        <div class="w-32 h-32 mb-6 relative z-10 group-hover:scale-110 transition-transform duration-500 animate-float" style="animation-delay: 1s;">
+                            <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-xl"><use href="#svg-limon"></use></svg>
+                        </div>
+                        <h3 class="font-display text-4xl text-gray-800 mb-2 relative z-10">El Limón</h3>
+                        <p class="text-lime-600 font-bold text-sm tracking-widest uppercase mb-4 relative z-10">Frescura Cítrica</p>
+                        <p class="text-gray-500 text-sm relative z-10 mb-6">Su viaje desde Asia, las variedades sin semilla y la cosecha entre espinas.</p>
+                        <span class="mt-auto inline-block bg-lime-100 text-lime-700 px-6 py-2 rounded-full font-bold group-hover:bg-lime-600 group-hover:text-white transition-colors relative z-10">
+                            Descubrir <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </span>
+                    </div>
+                </a>
+
+                <!-- 3. PAPAYA -->
+                <a href="Papaya.html" class="block group reveal delay-200 sm:col-span-1 lg:col-span-2">
+                    <div class="bg-white rounded-[2rem] p-8 shadow-lg border-2 border-red-100 hover:shadow-2xl hover:border-red-400 transition-all transform hover:-translate-y-3 relative overflow-hidden h-full flex flex-col items-center text-center">
+                        <div class="absolute inset-0 bg-gradient-to-br from-red-50 to-white opacity-50 z-0"></div>
+                        <div class="w-32 h-32 mb-6 relative z-10 group-hover:scale-110 transition-transform duration-500 animate-float" style="animation-delay: 2s;">
+                            <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-xl"><use href="#svg-papaya"></use></svg>
+                        </div>
+                        <h3 class="font-display text-4xl text-gray-800 mb-2 relative z-10">La Papaya</h3>
+                        <p class="text-red-500 font-bold text-sm tracking-widest uppercase mb-4 relative z-10">La Fruta de los Ángeles</p>
+                        <p class="text-gray-500 text-sm relative z-10 mb-6">Raíces mesoamericanas, plantas hermafroditas y su increíble poder digestivo.</p>
+                        <span class="mt-auto inline-block bg-red-100 text-red-700 px-6 py-2 rounded-full font-bold group-hover:bg-red-500 group-hover:text-white transition-colors relative z-10">
+                            Descubrir <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </span>
+                    </div>
+                </a>
+
+                <!-- 4. COCO -->
+                <a href="Coco.html" class="block group reveal delay-100 sm:col-span-1 lg:col-start-2 lg:col-span-2">
+                    <div class="bg-white rounded-[2rem] p-8 shadow-lg border-2 border-amber-100 hover:shadow-2xl hover:border-amber-700 transition-all transform hover:-translate-y-3 relative overflow-hidden h-full flex flex-col items-center text-center">
+                        <div class="absolute inset-0 bg-gradient-to-br from-amber-50 to-white opacity-50 z-0"></div>
+                        <div class="w-32 h-32 mb-6 relative z-10 group-hover:scale-110 transition-transform duration-500 animate-float" style="animation-delay: 3s;">
+                            <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-xl"><use href="#svg-coco"></use></svg>
+                        </div>
+                        <h3 class="font-display text-4xl text-gray-800 mb-2 relative z-10">El Coco</h3>
+                        <p class="text-amber-800 font-bold text-sm tracking-widest uppercase mb-4 relative z-10">El Árbol de la Vida</p>
+                        <p class="text-gray-500 text-sm relative z-10 mb-6">El navegante del océano, cultivado en la arena para darnos su agua y copra.</p>
+                        <span class="mt-auto inline-block bg-amber-100 text-amber-800 px-6 py-2 rounded-full font-bold group-hover:bg-amber-800 group-hover:text-white transition-colors relative z-10">
+                            Descubrir <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </span>
+                    </div>
+                </a>
+
+                <!-- 5. MELÓN -->
+                <a href="Melon.html" class="block group reveal delay-200 sm:col-span-1 lg:col-span-2">
+                    <div class="bg-white rounded-[2rem] p-8 shadow-lg border-2 border-yellow-200 hover:shadow-2xl hover:border-yellow-500 transition-all transform hover:-translate-y-3 relative overflow-hidden h-full flex flex-col items-center text-center">
+                        <div class="absolute inset-0 bg-gradient-to-br from-yellow-50 to-white opacity-50 z-0"></div>
+                        <div class="w-32 h-32 mb-6 relative z-10 group-hover:scale-110 transition-transform duration-500 animate-float" style="animation-delay: 4s;">
+                            <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-xl"><use href="#svg-melon"></use></svg>
+                        </div>
+                        <h3 class="font-display text-4xl text-gray-800 mb-2 relative z-10">El Melón</h3>
+                        <p class="text-yellow-600 font-bold text-sm tracking-widest uppercase mb-4 relative z-10">La Joya del Verano</p>
+                        <p class="text-gray-500 text-sm relative z-10 mb-6">Enredaderas, abejas polinizadoras y una hidratación excepcionalmente dulce.</p>
+                        <span class="mt-auto inline-block bg-yellow-100 text-yellow-700 px-6 py-2 rounded-full font-bold group-hover:bg-yellow-500 group-hover:text-white transition-colors relative z-10">
+                            Descubrir <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </span>
+                    </div>
+                </a>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer General -->
+    <footer class="bg-main-dark text-white pt-16 pb-8 relative overflow-hidden z-10">
+        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/leaves.png')] opacity-5 z-0"></div>
+        
+        <div class="max-w-7xl mx-auto px-4 flex flex-col items-center text-center relative z-10">
+            <div class="w-20 h-20 mb-6 bg-white text-main rounded-full flex items-center justify-center animate-wiggle shadow-xl">
+                <i class="fa-solid fa-basket-shopping text-4xl drop-shadow-md"></i>
+            </div>
+            <span class="font-display text-4xl mb-4">MundoFrutal</span>
+            <p class="text-main-light font-bold text-lg max-w-md mx-auto mb-8">El portal interactivo definitivo para aprender sobre la naturaleza que nos alimenta.</p>
+            
+            <!-- TARJETA DE DATOS ACADÉMICOS ACTUALIZADA CON EQUIPO -->
+            <div class="mt-4 mb-8 bg-white/10 p-8 rounded-[2rem] backdrop-blur-md border border-white/20 w-full max-w-5xl mx-auto shadow-2xl flex flex-col md:flex-row justify-between text-left gap-8 transform hover:scale-[1.02] transition-transform duration-300 relative overflow-hidden">
+                
+                <div class="absolute -right-10 -top-10 opacity-20 pointer-events-none">
+                    <i class="fa-solid fa-users text-9xl text-main-light"></i>
+                </div>
+
+                <!-- Lista de Integrantes -->
+                <div class="flex items-start gap-5 relative z-10 flex-1">
+                    <div class="w-16 h-16 bg-main rounded-full flex items-center justify-center flex-shrink-0 shadow-lg border-2 border-white/30">
+                        <i class="fa-solid fa-user-graduate text-white text-3xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-main-light font-display text-2xl mb-3 tracking-wide">Integrantes del Equipo</h4>
+                        <ul class="font-bold text-lg text-white space-y-1 mb-4">
+                            <li><i class="fa-solid fa-check text-main-accent text-sm mr-2"></i> Samuel Concepción Rasgado</li>
+                            <li><i class="fa-solid fa-check text-main-accent text-sm mr-2"></i> Jesús Andrés Ramón Martínez</li>
+                            <li><i class="fa-solid fa-check text-main-accent text-sm mr-2"></i> Luis Fernando Luna Alor</li>
+                            <li><i class="fa-solid fa-check text-main-accent text-sm mr-2"></i> Eder Abdeel Sanchéz Vasquéz</li>
+                            <li><i class="fa-solid fa-check text-main-accent text-sm mr-2"></i> Cristobál Marquez Gorgonio</li>
+                            <li><i class="fa-solid fa-check text-main-accent text-sm mr-2"></i> Kevin Alberto Torres Santos</li>
+                        </ul>
+                        <div class="flex items-center gap-2">
+                            <span class="bg-white/20 px-4 py-1 rounded-full text-sm font-bold text-white shadow-sm border border-white/10">Grupo: 6D</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="hidden md:block w-px bg-white/20 self-stretch relative z-10"></div>
+                
+                <!-- Docente -->
+                <div class="flex items-start gap-5 relative z-10 md:w-1/3">
+                    <div class="w-16 h-16 bg-main-accent rounded-full flex items-center justify-center flex-shrink-0 shadow-lg border-2 border-white/30">
+                        <i class="fa-solid fa-chalkboard-user text-white text-2xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-main-light font-display text-2xl mb-1 tracking-wide">Datos Académicos</h4>
+                        <p class="font-bold text-xl text-white">Docente: Martha Paxtian Diaz</p>
+                        <div class="flex items-center gap-2 mt-2">
+                            <span class="bg-white/20 px-4 py-1 rounded-full text-sm font-bold text-white shadow-sm border border-white/10">Materia: EPHE</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+       
+            
+            <div class="border-t border-white/20 w-full pt-8 text-white/50 text-sm font-bold flex flex-col md:flex-row justify-between items-center gap-4 px-6">
+                <span>&copy; 2026 Mundo Frutal. Proyecto Escolar.</span>
+                <span>Desarrollado con <i class="fa-solid fa-heart text-main-accent"></i> para la materia de EPHE</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- SCRIPTS -->
+    <script>
+        // Función para descargar el archivo HTML
+        function downloadHTML() {
+            const htmlContent = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'index.html'; // Nombre del archivo principal
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        // Efecto Navbar al hacer Scroll
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('shadow-md', 'py-0');
+                navbar.classList.remove('h-24');
+                navbar.classList.add('h-16');
+            } else {
+                navbar.classList.remove('shadow-md', 'py-0', 'h-16');
+                navbar.classList.add('h-24');
+            }
+        });
+
+        // Efecto Reveal de Tarjetas
+        function reveal() {
+            var reveals = document.querySelectorAll(".reveal");
+            for (var i = 0; i < reveals.length; i++) {
+                var windowHeight = window.innerHeight;
+                var elementTop = reveals[i].getBoundingClientRect().top;
+                if (elementTop < windowHeight - 50) {
+                    reveals[i].classList.add("active");
+                }
+            }
+        }
+        window.addEventListener("scroll", reveal);
+        reveal(); // Inicializar
+    </script>
+</body>
+</html>
